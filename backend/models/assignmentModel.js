@@ -1,3 +1,4 @@
+//Create several different types of assignment templates, such as MC quizzes, audios, and games
 const mongoose = require('mongoose');
 const { faker } = require('@faker-js/faker');
 
