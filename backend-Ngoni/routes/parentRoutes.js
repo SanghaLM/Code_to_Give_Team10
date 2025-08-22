@@ -1,5 +1,5 @@
 const express = require("express");
-const router = express.Router(); // Use Express's Router
+const router = express.Router();
 const parentController = require("../controllers/parentController");
 const authMiddleware = require("../middleware/authMiddleware");
 const uploadMiddleware = require("../middleware/uploadMiddleware");
@@ -13,10 +13,37 @@ router.get("/profile", authMiddleware, parentController.getParentProfile);
 router.put("/profile", authMiddleware, parentController.updateParentProfile);
 
 // Child Management
+router.post("/children", authMiddleware, parentController.addChildProfile);
 router.get("/children", authMiddleware, parentController.getChildren);
 router.get("/children/:childId", authMiddleware, parentController.getChild);
 
-// Homework Submissions
+// Homework Management
+router.get(
+  "/children/:childId/homeworks",
+  authMiddleware,
+  parentController.getAssignedHomeworks
+);
+router.get(
+  "/homework/:homeworkId/start",
+  authMiddleware,
+  parentController.startHomework
+);
+router.post(
+  "/homework/:homeworkId/word/:wordId/upload",
+  authMiddleware,
+  uploadMiddleware.single("file"),
+  parentController.uploadWordRecording
+);
+router.post(
+  "/homework/:homeworkId/submit",
+  authMiddleware,
+  parentController.submitHomework
+);
+router.get(
+  "/homework/:homeworkId/metrics",
+  authMiddleware,
+  parentController.getHomeworkMetrics
+);
 router.get(
   "/children/:childId/submissions",
   authMiddleware,
@@ -27,16 +54,12 @@ router.get(
   authMiddleware,
   parentController.getSubmissionByHomework
 );
+
+// Temporary Test Endpoint
 router.post(
-  "/homework/:homeworkId/submit",
+  "/homework/create-test",
   authMiddleware,
-  uploadMiddleware.single("file"),
-  parentController.submitHomework
-);
-router.get(
-  "/homework/:homeworkId/metrics",
-  authMiddleware,
-  parentController.getHomeworkMetrics
+  parentController.createTestHomework
 );
 
 module.exports = router;

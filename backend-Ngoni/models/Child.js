@@ -3,8 +3,8 @@ const Schema = mongoose.Schema;
 
 const ChildSchema = new Schema(
   {
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
+    firstName: { type: String, required: true }, // Make sure this matches
+    lastName: { type: String, required: true }, // Make sure this matches
     kindergartenLevel: {
       type: String,
       required: true,

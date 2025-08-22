@@ -4,6 +4,12 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const parentRoutes = require("./routes/parentRoutes");
 const cors = require("cors");
+const { cleanupUploads } = require("./utils/cleanup"); // From earlier
+const cron = require("node-cron");
+require("./models/Parent");
+require("./models/Child");
+require("./models/HomeworkSubmission");
+require("./models/Homework"); // Add this line
 
 dotenv.config();
 const app = express();

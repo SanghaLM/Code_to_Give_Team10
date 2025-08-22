@@ -8,79 +8,85 @@ const bcrypt = require("bcrypt");
 // ------------------------
 // Authentication / Profile
 // ------------------------
-
 exports.signupParent = async (req, res) => {
-  console.log("signupParent request:", req.body);
   try {
-    const { firstName, lastName, email, phone, password, childId } = req.body;
+    const {
+      firstName,
+      lastName,
+      username,
+      password,
+      confirmPassword,
+      childId,
+    } = req.body;
 
-    // Check if email already exists
-    const existingParent = await Parent.findOne({ email });
+    // Basic validation
+    if (!firstName || !lastName || !username || !password || !confirmPassword) {
+      return res.status(400).json({
+        message:
+          "First name, last name, username, password, and confirm password are required",
+      });
+    }
+
+    // Check if password matches confirmPassword
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: "Passwords do not match" });
+    }
+
+    // Check if username already exists
+    const existingParent = await Parent.findOne({ username });
     if (existingParent) {
-      console.log("Email already in use:", email);
-      return res.status(400).json({ message: "Email already in use" });
+      return res.status(400).json({ message: "Username already taken" });
     }
 
     // Validate childId if provided
-    if (childId) {
+    if (childId && mongoose.Types.ObjectId.isValid(childId)) {
       const child = await Child.findById(childId);
       if (!child) {
-        console.log("Invalid child ID:", childId);
         return res.status(400).json({ message: "Invalid child ID" });
       }
     }
 
-    // Hash the password
-    const saltRounds = 10;
+    const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     const parent = new Parent({
       firstName,
       lastName,
-      email,
-      phone,
+      username,
       password: hashedPassword,
-      children: childId ? [childId] : [],
+      children:
+        childId && mongoose.Types.ObjectId.isValid(childId) ? [childId] : [],
     });
 
     await parent.save();
-    console.log("Parent registered successfully:", parent);
     res.status(201).json({ message: "Parent registered successfully", parent });
   } catch (err) {
-    console.error("Error in signupParent:", err.message);
     res.status(500).json({ error: err.message });
   }
 };
 
 exports.loginParent = async (req, res) => {
-  console.log("loginParent request:", req.body);
   try {
-    const { email, password } = req.body;
+    const { username, password } = req.body; // Changed from email to username
 
-    const parent = await Parent.findOne({ email });
+    const parent = await Parent.findOne({ username });
     if (!parent) {
-      console.log("Parent not found for email:", email);
       return res.status(400).json({ message: "Parent not found" });
     }
 
-    // Compare entered password with hashed password
     const isMatch = await bcrypt.compare(password, parent.password);
     if (!isMatch) {
-      console.log("Incorrect password for email:", email);
       return res.status(400).json({ message: "Incorrect password" });
     }
 
-    // Generate JWT
     const token = jwt.sign(
       { id: parent._id, role: "parent" },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    console.log("Parent logged in successfully:", { id: parent._id, email });
     res.json({ token, parent });
   } catch (err) {
-    console.error("Error in loginParent:", err.message);
     res.status(500).json({ error: err.message });
   }
 };
@@ -127,6 +133,43 @@ exports.updateParentProfile = async (req, res) => {
 // ------------------------
 // Child Management
 // ------------------------
+// controllers/parentController.js
+exports.addChildProfile = async (req, res) => {
+  try {
+    const { firstName, lastName, kindergartenLevel, kindergartenName } =
+      req.body; // Changed field names
+    const parentId = req.user.id;
+
+    if (!firstName || !lastName || !kindergartenLevel || !kindergartenName) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const validLevels = ["K1", "K2", "K3"];
+    if (!validLevels.includes(kindergartenLevel)) {
+      return res.status(400).json({ message: "Invalid kindergarten level" });
+    }
+
+    const child = new Child({
+      firstName, // Fixed field name
+      lastName, // Fixed field name
+      kindergartenLevel,
+      kindergartenName,
+      parentId,
+    });
+
+    await child.save();
+
+    // Update parent's children array
+    await Parent.findByIdAndUpdate(parentId, {
+      $addToSet: { children: child._id },
+    });
+
+    const children = await Child.find({ parentId });
+    res.status(201).json({ message: "Child profile created", child, children });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 exports.getChildren = async (req, res) => {
   console.log("getChildren request for parent:", req.user.id);
@@ -159,6 +202,7 @@ exports.getChild = async (req, res) => {
 
 // ------------------------
 // Homework Submissions
+// ------------------------
 // ------------------------
 
 exports.getSubmissionsByChild = async (req, res) => {
@@ -245,48 +289,225 @@ exports.submitHomework = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+// NEW: Fetch Assigned Homeworks
+exports.getAssignedHomeworks = async (req, res) => {
+  console.log("getAssignedHomeworks request for child:", req.params.childId);
+  try {
+    const { childId } = req.params;
+    const child = await Child.findOne({ _id: childId, parentId: req.user.id });
+    if (!child) return res.status(404).json({ message: "Child not found" });
+    // Assume collaborator’s teacher API provides homework list
+    const homeworks = await mongoose
+      .model("Homework")
+      .find({ assignedTo: childId });
+    console.log("Assigned homeworks:", homeworks);
+    res.json(homeworks);
+  } catch (err) {
+    console.error("Error in getAssignedHomeworks:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
 
+// NEW: Start Homework
+exports.startHomework = async (req, res) => {
+  console.log("startHomework request:", req.params);
+  try {
+    const { homeworkId } = req.params;
+    const homework = await mongoose.model("Homework").findById(homeworkId);
+    if (!homework)
+      return res.status(404).json({ message: "Homework not found" });
+    res.json({ words: homework.words, mode: homework.mode });
+  } catch (err) {
+    console.error("Error in startHomework:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// NEW: Upload Word Recording
+exports.uploadWordRecording = async (req, res) => {
+  console.log("uploadWordRecording request:", req.params, req.body, req.file);
+  try {
+    const { homeworkId, wordId } = req.params;
+    const { studentId, isParent } = req.body; // isParent: true for parent, false for child
+    const homework = await mongoose.model("Homework").findById(homeworkId);
+    if (!homework)
+      return res.status(400).json({ message: "Invalid homework ID" });
+    const word = homework.words.id(wordId);
+    if (!word) return res.status(400).json({ message: "Invalid word ID" });
+    const child = await Child.findOne({
+      _id: studentId,
+      parentId: req.user.id,
+    });
+    if (!child) return res.status(400).json({ message: "Invalid child ID" });
+
+    // Placeholder AI scoring (replace later with real logic/API)
+    const score = Math.floor(Math.random() * 50 + 50); // Mock: 50-100
+    const feedback =
+      score > 80
+        ? "Great job! 😊"
+        : score > 50
+        ? "Nice try! 😐 Work on clarity."
+        : "Keep practicing! 😕";
+
+    // Update or create submission
+    let submission = await Submission.findOne({
+      homeworkId,
+      studentId,
+      parentId: req.user.id,
+    });
+    if (!submission) {
+      submission = new Submission({
+        homeworkId,
+        studentId,
+        parentId: req.user.id,
+        recordings: [],
+      });
+    }
+    const recordingEntry = {
+      wordId,
+      [isParent ? "parentAudioUrl" : "childAudioUrl"]: req.file?.path,
+      [isParent ? "parentScore" : "childScore"]: score,
+      feedback,
+    };
+    submission.recordings.push(recordingEntry);
+    await submission.save();
+
+    console.log("Recording uploaded:", recordingEntry);
+    res.json({ score, feedback, retriesLeft: 2 }); // Allow 2 retries
+  } catch (err) {
+    console.error("Error in uploadWordRecording:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// UPDATE: submitHomework (replace existing)
+exports.submitHomework = async (req, res) => {
+  console.log("submitHomework request:", req.body, req.params);
+  try {
+    const { homeworkId, studentId, timeTakenSeconds } = req.body;
+    const parentId = req.user.id;
+    const child = await Child.findOne({ _id: studentId, parentId });
+    if (!child) return res.status(400).json({ message: "Invalid child ID" });
+    const homework = await mongoose.model("Homework").findById(homeworkId);
+    if (!homework)
+      return res.status(400).json({ message: "Invalid homework ID" });
+
+    let submission = await Submission.findOne({
+      homeworkId,
+      studentId,
+      parentId,
+    });
+    if (!submission)
+      return res.status(400).json({ message: "No recordings found" });
+
+    submission.status = "completed";
+    submission.timeTakenSeconds = timeTakenSeconds;
+    submission.completedAt = new Date();
+    await submission.save();
+
+    const avgScore =
+      submission.recordings.reduce(
+        (sum, r) => sum + (r.parentScore || r.childScore || 0),
+        0
+      ) / submission.recordings.length;
+    console.log("Homework submitted:", submission);
+    res
+      .status(201)
+      .json({ message: "Homework submitted", submission, avgScore });
+  } catch (err) {
+    console.error("Error in submitHomework:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// UPDATE: getHomeworkMetrics (replace existing)
 exports.getHomeworkMetrics = async (req, res) => {
   console.log("getHomeworkMetrics request:", req.params);
   try {
     const { homeworkId } = req.params;
-
-    // Validate homeworkId
     const homework = await mongoose.model("Homework").findById(homeworkId);
-    if (!homework) {
-      console.log("Invalid homework ID:", homeworkId);
+    if (!homework)
       return res.status(400).json({ message: "Invalid homework ID" });
-    }
 
-    // Calculate metrics: completion rate and average time taken
     const submissions = await Submission.find({ homeworkId });
     const totalSubmissions = submissions.length;
     const completedSubmissions = submissions.filter(
-      (sub) => sub.status === "completed"
+      (s) => s.status === "completed"
     ).length;
-    const completionRate =
-      totalSubmissions > 0
-        ? (completedSubmissions / totalSubmissions) * 100
-        : 0;
-    const avgTimeTaken =
-      totalSubmissions > 0
-        ? submissions.reduce(
-            (sum, sub) => sum + (sub.timeTakenSeconds || 0),
+    const parentParticipation = submissions.filter((s) =>
+      s.recordings.some((r) => r.parentAudioUrl)
+    ).length;
+    const avgScore =
+      submissions.reduce(
+        (sum, s) =>
+          sum +
+          s.recordings.reduce(
+            (s2, r) => s2 + (r.parentScore || r.childScore || 0),
             0
-          ) / totalSubmissions
-        : 0;
+          ) /
+            s.recordings.length,
+        0
+      ) / totalSubmissions || 0;
 
     const metrics = {
       totalSubmissions,
       completedSubmissions,
-      completionRate: parseFloat(completionRate.toFixed(2)),
-      averageTimeTakenSeconds: parseFloat(avgTimeTaken.toFixed(2)),
+      completionRate:
+        totalSubmissions > 0
+          ? ((completedSubmissions / totalSubmissions) * 100).toFixed(2)
+          : 0,
+      parentParticipationRate:
+        totalSubmissions > 0
+          ? ((parentParticipation / totalSubmissions) * 100).toFixed(2)
+          : 0,
+      averageScore: avgScore.toFixed(2),
+      averageTimeTakenSeconds: (
+        submissions.reduce((sum, s) => sum + (s.timeTakenSeconds || 0), 0) /
+          totalSubmissions || 0
+      ).toFixed(2),
     };
 
-    console.log("Homework metrics retrieved:", metrics);
+    console.log("Homework metrics:", metrics);
     res.json(metrics);
   } catch (err) {
     console.error("Error in getHomeworkMetrics:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+exports.createTestHomework = async (req, res) => {
+  console.log("createTestHomework request for parent:", req.user.id);
+  try {
+    const { childId } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(childId)) {
+      return res.status(400).json({ message: "Invalid child ID" });
+    }
+    const child = await mongoose
+      .model("Child")
+      .findOne({ _id: childId, parentId: req.user.id });
+    if (!child) {
+      return res
+        .status(404)
+        .json({ message: "Child not found or not linked to parent" });
+    }
+
+    const homework = new mongoose.model("Homework")({
+      title: "Pronunciation Practice",
+      words: [
+        { text: "CAT", definition: "A small furry animal" },
+        { text: "DOG", definition: "A loyal pet" },
+        { text: "SUN", definition: "A bright star" },
+      ],
+      mode: "parent-guided",
+      assignedTo: [childId],
+      createdBy: new mongoose.Types.ObjectId("68a89c2ba5105996446eadff"), // Fixed: Added 'new'
+    });
+
+    await homework.save();
+    console.log("Test homework created:", homework._id);
+    res.status(201).json({ message: "Test homework created", homework });
+  } catch (err) {
+    console.error("Error in createTestHomework:", err.message);
     res.status(500).json({ error: err.message });
   }
 };

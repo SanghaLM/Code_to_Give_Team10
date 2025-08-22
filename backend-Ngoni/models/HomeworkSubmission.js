@@ -23,21 +23,18 @@ const HomeworkSubmissionSchema = new Schema(
       enum: ["pending", "completed"],
       default: "pending",
     },
-    audioUrl: {
-      type: String,
-    },
-    videoUrl: {
-      type: String,
-    },
-    score: {
-      type: Number,
-    },
-    completedAt: {
-      type: Date,
-    },
-    timeTakenSeconds: {
-      type: Number,
-    },
+    recordings: [
+      {
+        wordId: { type: mongoose.Schema.Types.ObjectId, required: true },
+        parentAudioUrl: { type: String },
+        childAudioUrl: { type: String },
+        parentScore: { type: Number },
+        childScore: { type: Number },
+        feedback: { type: String }, // e.g., "Nice try! Work on clarity."
+      },
+    ],
+    timeTakenSeconds: { type: Number },
+    completedAt: { type: Date },
   },
   { timestamps: true }
 );
