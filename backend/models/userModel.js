@@ -1,3 +1,4 @@
+//Create a Mongoose Schema and generate approximately 30 mock data with students and parents
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const { faker } = require('@faker-js/faker');
