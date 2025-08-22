@@ -1,0 +1,140 @@
+"""
+Report generator for English pronunciation practice.
+
+- Collects student assessments (from the pronunciation assessment API).
+- Stores per-session results (date, score, reference text, etc.).
+- Generates weekly and monthly AI reports with stats and insights.
+- Each report includes:
+  * Total practice days (active days)
+  * Total practice sessions (times)
+  * Average / best / trend of scores
+  * Estimated proficiency level
+  * Motivational AI-style summary
+- At week/month end, report is appended to student report history.
+
+Dependencies: pandas, pydantic
+pip install pandas pydantic
+
+This module is designed to be used alongside the FastAPI backend.
+You can persist session_data and report_history in a database (e.g., SQLite, MongoDB).
+Here we use in-memory dicts for demonstration.
+"""
+
+import datetime
+import statistics
+from typing import Dict, List, Optional
+
+import pandas as pd
+from pydantic import BaseModel
+
+# ----------------- Data Models -----------------
+
+class SessionRecord(BaseModel):
+    user_id: str
+    date: datetime.date
+    score: float
+    reference_text: str
+    duration_sec: float
+
+class Report(BaseModel):
+    user_id: str
+    report_type: str  # "weekly" or "monthly"
+    start_date: datetime.date
+    end_date: datetime.date
+    practice_days: int
+    practice_times: int
+    avg_score: float
+    best_score: float
+    level: str
+    summary: str
+
+# ----------------- In-memory Stores -----------------
+
+# In production, replace with DB tables
+session_data: Dict[str, List[SessionRecord]] = {}
+report_history: Dict[str, List[Report]] = {}
+
+# ----------------- Core Functions -----------------
+
+def add_session(user_id: str, score: float, reference_text: str, duration_sec: float):
+    today = datetime.date.today()
+    record = SessionRecord(
+        user_id=user_id,
+        date=today,
+        score=score,
+        reference_text=reference_text,
+        duration_sec=duration_sec,
+    )
+    session_data.setdefault(user_id, []).append(record)
+
+
+def generate_report(user_id: str, report_type: str) -> Optional[Report]:
+    if user_id not in session_data:
+        return None
+
+    today = datetime.date.today()
+    if report_type == "weekly":
+        start = today - datetime.timedelta(days=7)
+    elif report_type == "monthly":
+        start = today - datetime.timedelta(days=30)
+    else:
+        raise ValueError("report_type must be 'weekly' or 'monthly'")
+
+    records = [r for r in session_data[user_id] if r.date >= start]
+    if not records:
+        return None
+
+    # Stats
+    practice_days = len(set(r.date for r in records))
+    practice_times = len(records)
+    scores = [r.score for r in records]
+    avg_score = round(statistics.mean(scores), 2)
+    best_score = round(max(scores), 2)
+
+    # Determine level
+    if avg_score >= 90:
+        level = "Expert"
+    elif avg_score >= 75:
+        level = "Advanced"
+    elif avg_score >= 60:
+        level = "Intermediate"
+    else:
+        level = "Beginner"
+
+    # Motivational summary (simple heuristic)
+    summary = (
+        f"In this {report_type}, you practiced on {practice_days} days "
+        f"with {practice_times} sessions. Your average score is {avg_score}, "
+        f"and your best score reached {best_score}. You are currently at {level} level. "
+        f"Keep it up and aim higher next {report_type}!"
+    )
+
+    report = Report(
+        user_id=user_id,
+        report_type=report_type,
+        start_date=start,
+        end_date=today,
+        practice_days=practice_days,
+        practice_times=practice_times,
+        avg_score=avg_score,
+        best_score=best_score,
+        level=level,
+        summary=summary,
+    )
+
+    report_history.setdefault(user_id, []).append(report)
+    return report
+
+
+# ----------------- Example Usage -----------------
+if __name__ == "__main__":
+    # Simulate sessions
+    add_session("stu1", 82.5, "hello world", 2.5)
+    add_session("stu1", 90.0, "good morning", 3.0)
+    add_session("stu1", 70.0, "how are you", 2.2)
+
+    weekly_report = generate_report("stu1", "weekly")
+    monthly_report = generate_report("stu1", "monthly")
+
+    print("Weekly Report:\n", weekly_report.json(indent=2))
+    print("Monthly Report:\n", monthly_report.json(indent=2))
