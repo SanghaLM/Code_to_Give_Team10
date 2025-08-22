@@ -1,3 +1,4 @@
+//Generate some simulated submission records for some students
 const mongoose = require('mongoose');
 
 const submissionSchema = mongoose.Schema({
