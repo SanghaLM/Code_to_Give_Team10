@@ -1,3 +1,5 @@
+//Use Mongoose's connect() method.
+//Use a free MongoDB Atlas connect string as a demonstration, in order to run the sample code.
 const mongoose = require('mongoose');
 
 // **Note: This URI is for demonstration purposes only. For production environments, 
