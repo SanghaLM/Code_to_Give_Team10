@@ -1,10 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 export default function Hw4Screen() {
   const router = useRouter();
+  const [isCompleted, setIsCompleted] = useState(false);
+
+  const handleComplete = () => {
+    setIsCompleted(true);
+  };
+
+  const handleFinish = () => {
+    setTimeout(() => {
+      router.push('/tabs/homework/hw-end');
+    }, 1000);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -25,20 +36,59 @@ export default function Hw4Screen() {
 
       {/* Main Content */}
       <View style={styles.mainContent}>
-        <Text style={styles.instruction}>Complete the sentence</Text>
-        <Text style={styles.word}>orange</Text>
-        <View style={styles.audioIcon}>
-          <Ionicons name="volume-high" size={32} color="#fff" />
+        <Text style={styles.instruction}>Trace the letter</Text>
+        
+        <View style={styles.contentArea}>
+          <View style={styles.tracingContainer}>
+            <View style={styles.letterOutline}>
+              <Text style={styles.letterDots}>A</Text>
+              <View style={styles.tracePath}>
+                {/* Dotted outline of letter A */}
+                <View style={styles.dotRow}>
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                </View>
+                <View style={styles.dotRow}>
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                </View>
+                <View style={styles.dotRow}>
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                </View>
+              </View>
+            </View>
+          </View>
+
+          {!isCompleted && (
+            <Pressable style={styles.completeButton} onPress={handleComplete}>
+              <Text style={styles.completeButtonText}>Mark as Complete</Text>
+            </Pressable>
+          )}
+
+          {isCompleted && (
+            <Text style={styles.completedText}>Great job! Letter traced! 🎉</Text>
+          )}
         </View>
       </View>
 
       {/* Bottom Section */}
       <View style={styles.bottomSection}>
         <Pressable 
-          style={styles.nextButton}
-          onPress={() => router.push('/tabs/homework/hw-end')}
+          style={styles.finishButton}
+          onPress={handleFinish}
         >
-          <Text style={styles.nextButtonText}>Finish</Text>
+          <Text style={styles.finishButtonText}>Finish</Text>
           <Ionicons name="checkmark" size={20} color="#fff" />
         </Pressable>
       </View>
@@ -82,11 +132,10 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     marginBottom: 40,
+    fontFamily: 'BalsamiqSans_400Regular',
   },
   mainContent: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     paddingHorizontal: 20,
   },
   instruction: {
@@ -94,29 +143,79 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#000',
     marginBottom: 40,
-    textAlign: 'center',
+    textAlign: 'left',
+    fontFamily: 'BalsamiqSans_400Regular',
   },
-  word: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: '#007AFF',
-    marginBottom: 30,
-    textAlign: 'center',
-  },
-  audioIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#FF9500',
+  contentArea: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  tracingContainer: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  letterOutline: {
+    width: 200,
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  letterDots: {
+    fontSize: 120,
+    fontWeight: 'bold',
+    color: '#000',
+    opacity: 0.1,
+    fontFamily: 'BalsamiqSans_400Regular',
+  },
+  tracePath: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dotRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginVertical: 4,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#000',
+  },
+  completeButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 12,
+    marginBottom: 20,
+  },
+  completeButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+    fontFamily: 'BalsamiqSans_400Regular',
+  },
+  completedText: {
+    fontSize: 24,
+    color: '#10B981',
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+    fontFamily: 'BalsamiqSans_400Regular',
   },
   bottomSection: {
     paddingHorizontal: 20,
     paddingBottom: 40,
     alignItems: 'flex-end',
   },
-  nextButton: {
+  finishButton: {
     backgroundColor: '#34C759',
     paddingVertical: 15,
     paddingHorizontal: 30,
@@ -125,9 +224,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
-  nextButtonText: {
+  finishButtonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
+    fontFamily: 'BalsamiqSans_400Regular',
   },
 });

@@ -1,10 +1,36 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 export default function Hw3Screen() {
   const router = useRouter();
+  const [selectedCloud, setSelectedCloud] = useState(null);
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [showTryAgain, setShowTryAgain] = useState(false);
+
+  const handleCloudSelect = (index) => {
+    setSelectedCloud(index);
+    if (index === 2) { // Letter E is correct
+      setIsCorrect(true);
+      setShowTryAgain(false);
+    } else {
+      setIsCorrect(false);
+      setShowTryAgain(true);
+    }
+  };
+
+  const handleTryAgain = () => {
+    setSelectedCloud(null);
+    setIsCorrect(false);
+    setShowTryAgain(false);
+  };
+
+  const handleNext = () => {
+    setTimeout(() => {
+      router.push('/tabs/homework/hw-4');
+    }, 1000);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -25,10 +51,47 @@ export default function Hw3Screen() {
 
       {/* Main Content */}
       <View style={styles.mainContent}>
-        <Text style={styles.instruction}>Match the word</Text>
-        <Text style={styles.word}>banana</Text>
-        <View style={styles.audioIcon}>
-          <Ionicons name="volume-high" size={32} color="#fff" />
+        <Text style={styles.instruction}>
+          Click the cloud with the letter{' '}
+          <Text style={styles.highlightedLetter}>"E"</Text>
+        </Text>
+        
+        <View style={styles.contentArea}>
+          <View style={styles.cloudsContainer}>
+            <Pressable 
+              style={[styles.cloud, selectedCloud === 0 && styles.selectedCloud]}
+              onPress={() => handleCloudSelect(0)}
+            >
+              <Text style={styles.cloudLetter}>F</Text>
+            </Pressable>
+            
+            <Pressable 
+              style={[styles.cloud, selectedCloud === 1 && styles.selectedCloud]}
+              onPress={() => handleCloudSelect(1)}
+            >
+              <Text style={styles.cloudLetter}>K</Text>
+            </Pressable>
+            
+            <Pressable 
+              style={[styles.cloud, selectedCloud === 2 && styles.selectedCloud]}
+              onPress={() => handleCloudSelect(2)}
+            >
+              <Text style={styles.cloudLetter}>E</Text>
+            </Pressable>
+          </View>
+
+          {showTryAgain && (
+            <View style={styles.tryAgainContainer}>
+              <Text style={styles.tryAgainText}>Try again!</Text>
+              <Pressable style={styles.tryAgainButton} onPress={handleTryAgain}>
+                <Text style={styles.tryAgainButtonText}>Try Again</Text>
+              </Pressable>
+            </View>
+          )}
+
+          {isCorrect && (
+            <Text style={styles.correctText}>Correct! 🎉</Text>
+          )}
         </View>
       </View>
 
@@ -36,7 +99,7 @@ export default function Hw3Screen() {
       <View style={styles.bottomSection}>
         <Pressable 
           style={styles.nextButton}
-          onPress={() => router.push('/tabs/homework/hw-4')}
+          onPress={handleNext}
         >
           <Text style={styles.nextButtonText}>Next</Text>
           <Ionicons name="arrow-forward" size={20} color="#fff" />
@@ -82,11 +145,10 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     marginBottom: 40,
+    fontFamily: 'BalsamiqSans_400Regular',
   },
   mainContent: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     paddingHorizontal: 20,
   },
   instruction: {
@@ -94,22 +156,76 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#000',
     marginBottom: 40,
-    textAlign: 'center',
+    textAlign: 'left',
+    fontFamily: 'BalsamiqSans_400Regular',
   },
-  word: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: '#007AFF',
-    marginBottom: 30,
-    textAlign: 'center',
-  },
-  audioIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#FF9500',
+  contentArea: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  highlightedLetter: {
+    color: '#FF9500',
+  },
+  cloudsContainer: {
+    alignItems: 'center',
+    gap: 30,
+    marginBottom: 40,
+  },
+  cloud: {
+    width: 120,
+    height: 80,
+    backgroundColor: '#fff',
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#87CEEB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  selectedCloud: {
+    borderColor: '#FF6B6B',
+    borderWidth: 4,
+    backgroundColor: '#FFF0F0',
+  },
+  cloudLetter: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: '#FF0000',
+    fontFamily: 'BalsamiqSans_400Regular',
+  },
+  tryAgainContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  tryAgainText: {
+    fontSize: 20,
+    color: '#FF6B6B',
+    marginBottom: 15,
+    fontFamily: 'BalsamiqSans_400Regular',
+  },
+  tryAgainButton: {
+    backgroundColor: '#FF6B6B',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  tryAgainButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'BalsamiqSans_400Regular',
+  },
+  correctText: {
+    fontSize: 24,
+    color: '#10B981',
+    fontWeight: 'bold',
+    marginTop: 20,
+    fontFamily: 'BalsamiqSans_400Regular',
   },
   bottomSection: {
     paddingHorizontal: 20,
@@ -129,5 +245,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
+    fontFamily: 'BalsamiqSans_400Regular',
   },
 });
