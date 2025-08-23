@@ -3,8 +3,7 @@ import { Dimensions } from "react-native";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import ForFun from "./communityTabs/ForFun";
 import HomeworkHelp from "./communityTabs/HomeworkHelp";
-// Placeholder for MessageTeacher, you can replace with your actual component
-import MessageTeacherRoute from "./MessageTeacherRoute"; // The WhatsApp-like chat
+import MessageTeacher from "./MessageTeacherRoute"; // The WhatsApp-like chat
 const initialLayout = { width: Dimensions.get("window").width };
 
 export default function CommunityScreen() {
