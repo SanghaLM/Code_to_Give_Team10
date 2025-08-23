@@ -16,7 +16,11 @@ router.put("/profile", authMiddleware, parentController.updateParentProfile);
 router.post("/children", authMiddleware, parentController.addChildProfile);
 router.get("/children", authMiddleware, parentController.getChildren);
 router.get("/children/:childId", authMiddleware, parentController.getChild);
-
+router.post(
+  "/children/:childId/request-teacher",
+  authMiddleware,
+  parentController.requestTeacher
+);
 // Homework Management
 router.get(
   "/children/:childId/homeworks",
@@ -55,11 +59,11 @@ router.get(
   parentController.getSubmissionByHomework
 );
 
-// Temporary Test Endpoint
-router.post(
-  "/homework/create-test",
-  authMiddleware,
-  parentController.createTestHomework
-);
+// // Temporary Test Endpoint
+// router.post(
+//   "/homework/create-test",
+//   authMiddleware,
+//   parentController.createTestHomework
+// );
 
 module.exports = router;

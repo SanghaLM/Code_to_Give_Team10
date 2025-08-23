@@ -16,17 +16,51 @@ router.put("/profile", authMiddleware, teacherController.updateTeacherProfile);
 // Homework Management
 router.post("/homework", authMiddleware, teacherController.createHomework);
 router.get("/homework", authMiddleware, teacherController.getHomeworkList);
-router.get("/homework/:homeworkId", authMiddleware, teacherController.getHomeworkDetail);
-router.put("/homework/:homeworkId", authMiddleware, teacherController.updateHomework);
-router.delete("/homework/:homeworkId", authMiddleware, teacherController.deleteHomework);
+router.get(
+  "/homework/:homeworkId",
+  authMiddleware,
+  teacherController.getHomeworkDetail
+);
+router.put(
+  "/homework/:homeworkId",
+  authMiddleware,
+  teacherController.updateHomework
+);
+router.delete(
+  "/homework/:homeworkId",
+  authMiddleware,
+  teacherController.deleteHomework
+);
 
 // Submissions & Feedback
-router.get("/homework/:homeworkId/submissions", authMiddleware, teacherController.getSubmissions);
-router.post("/submission/:id/feedback", authMiddleware, teacherController.provideFeedback);
+router.get(
+  "/pending-students",
+  authMiddleware,
+  teacherController.getPendingStudents
+); // Added
+router.get(
+  "/homework/:homeworkId/submissions",
+  authMiddleware,
+  teacherController.getSubmissions
+);
+router.post(
+  "/submission/:id/feedback",
+  authMiddleware,
+  teacherController.provideFeedback
+);
 
 // Student Management
+router.post(
+  "/students/approve",
+  authMiddleware,
+  teacherController.approveStudent
+);
 router.get("/students", authMiddleware, teacherController.getStudents);
-router.get("/students/:id/progress", authMiddleware, teacherController.getStudentProgress);
+router.get(
+  "/students/:id/progress",
+  authMiddleware,
+  teacherController.getStudentProgress
+);
+router.post("/students", authMiddleware, teacherController.addStudent); // Added
 
 module.exports = router;
-

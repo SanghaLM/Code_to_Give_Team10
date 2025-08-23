@@ -4,6 +4,7 @@ const Submission = require("../models/HomeworkSubmission");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const Teacher = require("../models/Teacher"); // Added
 
 // ------------------------
 // Authentication / Profile
@@ -61,13 +62,14 @@ exports.signupParent = async (req, res) => {
     await parent.save();
     res.status(201).json({ message: "Parent registered successfully", parent });
   } catch (err) {
+    console.error("Error in signupParent:", err.message);
     res.status(500).json({ error: err.message });
   }
 };
 
 exports.loginParent = async (req, res) => {
   try {
-    const { username, password } = req.body; // Changed from email to username
+    const { username, password } = req.body;
 
     const parent = await Parent.findOne({ username });
     if (!parent) {
@@ -87,6 +89,7 @@ exports.loginParent = async (req, res) => {
 
     res.json({ token, parent });
   } catch (err) {
+    console.error("Error in loginParent:", err.message);
     res.status(500).json({ error: err.message });
   }
 };
@@ -113,7 +116,6 @@ exports.updateParentProfile = async (req, res) => {
   try {
     const updates = req.body;
 
-    // If updating password, hash it first
     if (updates.password) {
       const saltRounds = 10;
       updates.password = await bcrypt.hash(updates.password, saltRounds);
@@ -133,11 +135,10 @@ exports.updateParentProfile = async (req, res) => {
 // ------------------------
 // Child Management
 // ------------------------
-// controllers/parentController.js
 exports.addChildProfile = async (req, res) => {
   try {
     const { firstName, lastName, kindergartenLevel, kindergartenName } =
-      req.body; // Changed field names
+      req.body;
     const parentId = req.user.id;
 
     if (!firstName || !lastName || !kindergartenLevel || !kindergartenName) {
@@ -150,8 +151,8 @@ exports.addChildProfile = async (req, res) => {
     }
 
     const child = new Child({
-      firstName, // Fixed field name
-      lastName, // Fixed field name
+      firstName,
+      lastName,
       kindergartenLevel,
       kindergartenName,
       parentId,
@@ -159,7 +160,6 @@ exports.addChildProfile = async (req, res) => {
 
     await child.save();
 
-    // Update parent's children array
     await Parent.findByIdAndUpdate(parentId, {
       $addToSet: { children: child._id },
     });
@@ -167,6 +167,7 @@ exports.addChildProfile = async (req, res) => {
     const children = await Child.find({ parentId });
     res.status(201).json({ message: "Child profile created", child, children });
   } catch (err) {
+    console.error("Error in addChildProfile:", err.message);
     res.status(500).json({ error: err.message });
   }
 };
@@ -201,104 +202,21 @@ exports.getChild = async (req, res) => {
 };
 
 // ------------------------
-// Homework Submissions
+// Homework Management
 // ------------------------
-// ------------------------
-
-exports.getSubmissionsByChild = async (req, res) => {
-  console.log("getSubmissionsByChild request:", req.params);
-  try {
-    const { childId } = req.params;
-    const submissions = await Submission.find({
-      studentId: childId,
-      parentId: req.user.id,
-    });
-    console.log("Submissions retrieved for child:", childId, submissions);
-    res.json(submissions);
-  } catch (err) {
-    console.error("Error in getSubmissionsByChild:", err.message);
-    res.status(500).json({ error: err.message });
-  }
-};
-
-exports.getSubmissionByHomework = async (req, res) => {
-  console.log("getSubmissionByHomework request:", req.params);
-  try {
-    const { homeworkId } = req.params;
-    const submission = await Submission.findOne({
-      homeworkId,
-      parentId: req.user.id,
-    });
-    if (!submission) {
-      console.log("Submission not found for homework:", homeworkId);
-      return res.status(404).json({ message: "Submission not found" });
-    }
-    console.log("Submission retrieved:", submission);
-    res.json(submission);
-  } catch (err) {
-    console.error("Error in getSubmissionByHomework:", err.message);
-    res.status(500).json({ error: err.message });
-  }
-};
-
-exports.submitHomework = async (req, res) => {
-  console.log(
-    "submitHomework request:",
-    req.body,
-    req.params,
-    "file:",
-    req.file
-  );
-  try {
-    const { homeworkId, studentId, timeTakenSeconds } = req.body;
-    const parentId = req.user.id;
-
-    // Validate studentId belongs to parent
-    const child = await Child.findOne({ _id: studentId, parentId });
-    if (!child) {
-      console.log("Invalid child ID:", studentId);
-      return res.status(400).json({ message: "Invalid child ID" });
-    }
-
-    // Validate homeworkId
-    const homework = await mongoose.model("Homework").findById(homeworkId);
-    if (!homework) {
-      console.log("Invalid homework ID:", homeworkId);
-      return res.status(400).json({ message: "Invalid homework ID" });
-    }
-
-    const newSubmission = new Submission({
-      homeworkId,
-      parentId,
-      studentId,
-      status: "completed",
-      timeTakenSeconds,
-      audioUrl: req.file?.mimetype.includes("audio") ? req.file.path : null,
-      videoUrl: req.file?.mimetype.includes("video") ? req.file.path : null,
-      completedAt: new Date(),
-    });
-
-    await newSubmission.save();
-    console.log("Homework submission saved:", newSubmission);
-    res.status(201).json({
-      message: "Homework submitted successfully",
-      submission: newSubmission,
-    });
-  } catch (err) {
-    console.error("Error in submitHomework:", err.message);
-    res.status(500).json({ error: err.message });
-  }
-};
-// NEW: Fetch Assigned Homeworks
 exports.getAssignedHomeworks = async (req, res) => {
   console.log("getAssignedHomeworks request for child:", req.params.childId);
   try {
     const { childId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(childId)) {
+      return res.status(400).json({ message: "Invalid child ID" });
+    }
     const child = await Child.findOne({ _id: childId, parentId: req.user.id });
-    if (!child) return res.status(404).json({ message: "Child not found" });
-    // Assume collaborator’s teacher API provides homework list
+    if (!child) {
+      return res.status(404).json({ message: "Child not found" });
+    }
     const homeworks = await mongoose
-      .model("Homework")
+      .model("HomeworkAssignment")
       .find({ assignedTo: childId });
     console.log("Assigned homeworks:", homeworks);
     res.json(homeworks);
@@ -308,39 +226,53 @@ exports.getAssignedHomeworks = async (req, res) => {
   }
 };
 
-// NEW: Start Homework
 exports.startHomework = async (req, res) => {
   console.log("startHomework request:", req.params);
   try {
     const { homeworkId } = req.params;
-    const homework = await mongoose.model("Homework").findById(homeworkId);
-    if (!homework)
+    const homework = await mongoose
+      .model("HomeworkAssignment")
+      .findById(homeworkId);
+    if (!homework) {
       return res.status(404).json({ message: "Homework not found" });
-    res.json({ words: homework.words, mode: homework.mode });
+    }
+    res.json({ words: homework.words, mode: "parent-guided" }); // Default to parent-guided
   } catch (err) {
     console.error("Error in startHomework:", err.message);
     res.status(500).json({ error: err.message });
   }
 };
 
-// NEW: Upload Word Recording
 exports.uploadWordRecording = async (req, res) => {
   console.log("uploadWordRecording request:", req.params, req.body, req.file);
   try {
     const { homeworkId, wordId } = req.params;
-    const { studentId, isParent } = req.body; // isParent: true for parent, false for child
-    const homework = await mongoose.model("Homework").findById(homeworkId);
-    if (!homework)
+    const { studentId, isParent } = req.body;
+    if (
+      !mongoose.Types.ObjectId.isValid(homeworkId) ||
+      !mongoose.Types.ObjectId.isValid(wordId) ||
+      !mongoose.Types.ObjectId.isValid(studentId)
+    ) {
+      return res.status(400).json({ message: "Invalid ID" });
+    }
+    const homework = await mongoose
+      .model("HomeworkAssignment")
+      .findById(homeworkId);
+    if (!homework) {
       return res.status(400).json({ message: "Invalid homework ID" });
+    }
     const word = homework.words.id(wordId);
-    if (!word) return res.status(400).json({ message: "Invalid word ID" });
+    if (!word) {
+      return res.status(400).json({ message: "Invalid word ID" });
+    }
     const child = await Child.findOne({
       _id: studentId,
       parentId: req.user.id,
     });
-    if (!child) return res.status(400).json({ message: "Invalid child ID" });
+    if (!child) {
+      return res.status(400).json({ message: "Invalid child ID" });
+    }
 
-    // Placeholder AI scoring (replace later with real logic/API)
     const score = Math.floor(Math.random() * 50 + 50); // Mock: 50-100
     const feedback =
       score > 80
@@ -349,7 +281,6 @@ exports.uploadWordRecording = async (req, res) => {
         ? "Nice try! 😐 Work on clarity."
         : "Keep practicing! 😕";
 
-    // Update or create submission
     let submission = await Submission.findOne({
       homeworkId,
       studentId,
@@ -373,32 +304,43 @@ exports.uploadWordRecording = async (req, res) => {
     await submission.save();
 
     console.log("Recording uploaded:", recordingEntry);
-    res.json({ score, feedback, retriesLeft: 2 }); // Allow 2 retries
+    res.json({ score, feedback, retriesLeft: 2 });
   } catch (err) {
     console.error("Error in uploadWordRecording:", err.message);
     res.status(500).json({ error: err.message });
   }
 };
 
-// UPDATE: submitHomework (replace existing)
 exports.submitHomework = async (req, res) => {
   console.log("submitHomework request:", req.body, req.params);
   try {
     const { homeworkId, studentId, timeTakenSeconds } = req.body;
     const parentId = req.user.id;
+    if (
+      !mongoose.Types.ObjectId.isValid(homeworkId) ||
+      !mongoose.Types.ObjectId.isValid(studentId)
+    ) {
+      return res.status(400).json({ message: "Invalid ID" });
+    }
     const child = await Child.findOne({ _id: studentId, parentId });
-    if (!child) return res.status(400).json({ message: "Invalid child ID" });
-    const homework = await mongoose.model("Homework").findById(homeworkId);
-    if (!homework)
+    if (!child) {
+      return res.status(400).json({ message: "Invalid child ID" });
+    }
+    const homework = await mongoose
+      .model("HomeworkAssignment")
+      .findById(homeworkId);
+    if (!homework) {
       return res.status(400).json({ message: "Invalid homework ID" });
+    }
 
     let submission = await Submission.findOne({
       homeworkId,
       studentId,
       parentId,
     });
-    if (!submission)
+    if (!submission) {
       return res.status(400).json({ message: "No recordings found" });
+    }
 
     submission.status = "completed";
     submission.timeTakenSeconds = timeTakenSeconds;
@@ -420,14 +362,19 @@ exports.submitHomework = async (req, res) => {
   }
 };
 
-// UPDATE: getHomeworkMetrics (replace existing)
 exports.getHomeworkMetrics = async (req, res) => {
   console.log("getHomeworkMetrics request:", req.params);
   try {
     const { homeworkId } = req.params;
-    const homework = await mongoose.model("Homework").findById(homeworkId);
-    if (!homework)
+    if (!mongoose.Types.ObjectId.isValid(homeworkId)) {
       return res.status(400).json({ message: "Invalid homework ID" });
+    }
+    const homework = await mongoose
+      .model("HomeworkAssignment")
+      .findById(homeworkId);
+    if (!homework) {
+      return res.status(400).json({ message: "Invalid homework ID" });
+    }
 
     const submissions = await Submission.find({ homeworkId });
     const totalSubmissions = submissions.length;
@@ -455,11 +402,11 @@ exports.getHomeworkMetrics = async (req, res) => {
       completionRate:
         totalSubmissions > 0
           ? ((completedSubmissions / totalSubmissions) * 100).toFixed(2)
-          : 0,
+          : "0.00",
       parentParticipationRate:
         totalSubmissions > 0
           ? ((parentParticipation / totalSubmissions) * 100).toFixed(2)
-          : 0,
+          : "0.00",
       averageScore: avgScore.toFixed(2),
       averageTimeTakenSeconds: (
         submissions.reduce((sum, s) => sum + (s.timeTakenSeconds || 0), 0) /
@@ -474,40 +421,122 @@ exports.getHomeworkMetrics = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-exports.createTestHomework = async (req, res) => {
-  console.log("createTestHomework request for parent:", req.user.id);
-  try {
-    const { childId } = req.body;
 
+exports.getSubmissionsByChild = async (req, res) => {
+  console.log("getSubmissionsByChild request:", req.params);
+  try {
+    const { childId } = req.params;
     if (!mongoose.Types.ObjectId.isValid(childId)) {
       return res.status(400).json({ message: "Invalid child ID" });
     }
-    const child = await mongoose
-      .model("Child")
-      .findOne({ _id: childId, parentId: req.user.id });
+    const submissions = await Submission.find({
+      studentId: childId,
+      parentId: req.user.id,
+    });
+    console.log("Submissions retrieved for child:", childId, submissions);
+    res.json(submissions);
+  } catch (err) {
+    console.error("Error in getSubmissionsByChild:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getSubmissionByHomework = async (req, res) => {
+  console.log("getSubmissionByHomework request:", req.params);
+  try {
+    const { homeworkId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(homeworkId)) {
+      return res.status(400).json({ message: "Invalid homework ID" });
+    }
+    const submission = await Submission.findOne({
+      homeworkId,
+      parentId: req.user.id,
+    });
+    if (!submission) {
+      console.log("Submission not found for homework:", homeworkId);
+      return res.status(404).json({ message: "Submission not found" });
+    }
+    console.log("Submission retrieved:", submission);
+    res.json(submission);
+  } catch (err) {
+    console.error("Error in getSubmissionByHomework:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+exports.requestTeacher = async (req, res) => {
+  console.log("requestTeacher request:", req.params, req.body);
+  try {
+    const { childId } = req.params;
+    const { teacherId } = req.body;
+
+    if (
+      !mongoose.Types.ObjectId.isValid(childId) ||
+      !mongoose.Types.ObjectId.isValid(teacherId)
+    ) {
+      return res.status(400).json({ message: "Invalid child or teacher ID" });
+    }
+
+    const child = await Child.findOne({ _id: childId, parentId: req.user.id });
     if (!child) {
       return res
         .status(404)
         .json({ message: "Child not found or not linked to parent" });
     }
 
-    const homework = new mongoose.model("Homework")({
-      title: "Pronunciation Practice",
-      words: [
-        { text: "CAT", definition: "A small furry animal" },
-        { text: "DOG", definition: "A loyal pet" },
-        { text: "SUN", definition: "A bright star" },
-      ],
-      mode: "parent-guided",
-      assignedTo: [childId],
-      createdBy: new mongoose.Types.ObjectId("68a89c2ba5105996446eadff"), // Fixed: Added 'new'
-    });
+    const teacher = await Teacher.findById(teacherId);
+    if (!teacher) {
+      return res.status(404).json({ message: "Teacher not found" });
+    }
 
-    await homework.save();
-    console.log("Test homework created:", homework._id);
-    res.status(201).json({ message: "Test homework created", homework });
+    if (child.pendingTeachers.includes(teacherId)) {
+      return res.status(400).json({ message: "Request already pending" });
+    }
+
+    child.pendingTeachers.push(teacherId);
+    await child.save();
+
+    console.log("Teacher request sent:", teacherId);
+    res.status(201).json({ message: "Teacher request sent", teacher });
   } catch (err) {
-    console.error("Error in createTestHomework:", err.message);
+    console.error("Error in requestTeacher:", err.message);
     res.status(500).json({ error: err.message });
   }
 };
+
+// exports.createTestHomework = async (req, res) => {
+//   console.log("createTestHomework request for parent:", req.user.id);
+//   try {
+//     const { childId } = req.body;
+
+//     if (!mongoose.Types.ObjectId.isValid(childId)) {
+//       return res.status(400).json({ message: "Invalid child ID" });
+//     }
+//     const child = await mongoose
+//       .model("Child")
+//       .findOne({ _id: childId, parentId: req.user.id });
+//     if (!child) {
+//       return res
+//         .status(404)
+//         .json({ message: "Child not found or not linked to parent" });
+//     }
+
+//     const homework = new mongoose.model("HomeworkAssignment")({
+//       title: "Pronunciation Practice",
+//       words: [
+//         { word: "CAT", example: "The cat is on the mat." },
+//         { word: "DOG", example: "The dog barks loudly." },
+//         { word: "SUN", example: "The sun shines brightly." },
+//       ],
+//       assignedTo: [childId],
+//       createdBy: new mongoose.Types.ObjectId("68a89c2ba5105996446eadff"),
+//       dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+//     });
+
+//     await homework.save();
+//     console.log("Test homework created:", homework._id);
+//     res.status(201).json({ message: "Test homework created", homework });
+//   } catch (err) {
+//     console.error("Error in createTestHomework:", err.message);
+//     res.status(500).json({ error: err.message });
+//   }
+// };

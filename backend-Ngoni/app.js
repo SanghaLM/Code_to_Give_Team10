@@ -3,13 +3,17 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const parentRoutes = require("./routes/parentRoutes");
+const teacherRoutes = require("./routes/teacherRoutes"); // Added
+
 const cors = require("cors");
 const { cleanupUploads } = require("./utils/cleanup"); // From earlier
 const cron = require("node-cron");
 require("./models/Parent");
 require("./models/Child");
 require("./models/HomeworkSubmission");
-require("./models/Homework"); // Add this line
+require("./models/HomeworkAssignment"); // Changed from Homework
+require("./models/Teacher");
+require("./models/SubmissionFeedback");
 
 dotenv.config();
 const app = express();
@@ -27,6 +31,7 @@ console.log("Middleware configured: CORS, body-parser, static uploads");
 // Routes
 app.use("/api/parents", parentRoutes);
 console.log("Parent routes registered");
+app.use("/api/teachers", teacherRoutes); // Added
 
 app.get("/", (req, res) => {
   console.log("Root endpoint accessed");

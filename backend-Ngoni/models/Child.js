@@ -3,8 +3,8 @@ const Schema = mongoose.Schema;
 
 const ChildSchema = new Schema(
   {
-    firstName: { type: String, required: true }, // Make sure this matches
-    lastName: { type: String, required: true }, // Make sure this matches
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
     kindergartenLevel: {
       type: String,
       required: true,
@@ -16,6 +16,7 @@ const ChildSchema = new Schema(
       ref: "Parent",
       required: true,
     },
+    pendingTeachers: [{ type: mongoose.Schema.Types.ObjectId, ref: "Teacher" }], // Added for pending assignments
   },
   { timestamps: true }
 );
