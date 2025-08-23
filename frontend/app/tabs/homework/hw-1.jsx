@@ -25,10 +25,10 @@ export default function Hw1Screen() {
 
       {/* Main Content */}
       <View style={styles.mainContent}>
-        <Text style={styles.instruction}>Point and read</Text>
+        <Text style={styles.instruction}>Point and read.</Text>
         <Text style={styles.word}>panda</Text>
         <View style={styles.audioIcon}>
-          <Ionicons name="volume-high" size={32} color="#fff" />
+          <Ionicons name="finger-print-outline" size={32} color="#fff" />
         </View>
       </View>
 
