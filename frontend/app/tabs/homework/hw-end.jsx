@@ -1,10 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 export default function HwEndScreen() {
   const router = useRouter();
+
+  const handleBackToTasks = () => {
+    setTimeout(() => {
+      router.push('/tabs/task');
+    }, 1000);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -43,7 +49,7 @@ export default function HwEndScreen() {
       <View style={styles.bottomSection}>
         <Pressable 
           style={styles.finishButton}
-          onPress={() => router.push('/tabs/task')}
+          onPress={handleBackToTasks}
         >
           <Text style={styles.finishButtonText}>Back to Tasks</Text>
           <Ionicons name="home" size={20} color="#fff" />
@@ -68,6 +74,7 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     marginBottom: 20,
+    fontFamily: 'BalsamiqSans_400Regular',
   },
   mainContent: {
     flex: 1,
@@ -86,11 +93,13 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 10,
     textAlign: 'center',
+    fontFamily: 'BalsamiqSans_400Regular',
   },
   completionText: {
     fontSize: 18,
     color: '#666',
     textAlign: 'center',
+    fontFamily: 'BalsamiqSans_400Regular',
   },
   scoreContainer: {
     alignItems: 'center',
@@ -100,17 +109,20 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#666',
     marginBottom: 10,
+    fontFamily: 'BalsamiqSans_400Regular',
   },
   scoreValue: {
     fontSize: 48,
     fontWeight: 'bold',
     color: '#007AFF',
     marginBottom: 5,
+    fontFamily: 'BalsamiqSans_400Regular',
   },
   scorePercentage: {
     fontSize: 24,
     color: '#10b981',
     fontWeight: '600',
+    fontFamily: 'BalsamiqSans_400Regular',
   },
   statsContainer: {
     width: '100%',
@@ -128,6 +140,7 @@ const styles = StyleSheet.create({
   statText: {
     fontSize: 16,
     color: '#333',
+    fontFamily: 'BalsamiqSans_400Regular',
   },
   bottomSection: {
     paddingHorizontal: 20,
@@ -147,5 +160,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
+    fontFamily: 'BalsamiqSans_400Regular',
   },
 });

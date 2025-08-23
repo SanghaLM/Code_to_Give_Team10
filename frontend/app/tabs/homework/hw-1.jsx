@@ -1,50 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet, Pressable, SafeAreaView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Pressable, SafeAreaView, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-
-export default function Hw1Screen() {
-  const router = useRouter();
-
-  return (
-    <SafeAreaView style={styles.container}>
-      {/* Top Section */}
-      <View style={styles.topSection}>
-        <View style={styles.headerRow}>
-          <Pressable onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#000" />
-          </Pressable>
-          <View style={styles.progressContainer}>
-            <View style={styles.progressBar}>
-              <View style={styles.progressFill} />
-            </View>
-          </View>
-        </View>
-        <Text style={styles.moduleInfo}>Booklet 2, Module 4 - Fruits</Text>
-      </View>
-
-      {/* Main Content */}
-      <View style={styles.mainContent}>
-        <Text style={styles.instruction}>Point and read.</Text>
-        <Text style={styles.word}>panda</Text>
-        <View style={styles.audioIcon}>
-          <Ionicons name="finger-print-outline" size={32} color="#fff" />
-        </View>
-      </View>
-
-      {/* Bottom Section */}
-      <View style={styles.bottomSection}>
-        <Pressable 
-          style={styles.nextButton}
-          onPress={() => router.push('/tabs/homework/hw-2')}
-        >
-          <Text style={styles.nextButtonText}>Next</Text>
-          <Ionicons name="arrow-forward" size={20} color="#fff" />
-        </Pressable>
-      </View>
-    </SafeAreaView>
-  );
-}
 
 const styles = StyleSheet.create({
   container: {
@@ -81,7 +38,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     textAlign: 'center',
+    marginBottom: 20,
+    fontFamily: 'BalsamiqSans_400Regular',
+  },
+  instructionContainer: {
+    paddingHorizontal: 20,
     marginBottom: 40,
+  },
+  instruction: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#000',
+    textAlign: 'left',
+    fontFamily: 'BalsamiqSans_400Regular',
   },
   mainContent: {
     flex: 1,
@@ -89,19 +58,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
   },
-  instruction: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 40,
-    textAlign: 'center',
-  },
   word: {
     fontSize: 48,
     fontWeight: 'bold',
     color: '#007AFF',
     marginBottom: 30,
     textAlign: 'center',
+    fontFamily: 'BalsamiqSans_400Regular',
   },
   audioIcon: {
     width: 60,
@@ -129,5 +92,57 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
+    fontFamily: 'BalsamiqSans_400Regular',
   },
 });
+
+export default function Hw1Screen() {
+  const router = useRouter();
+
+  const handleNext = () => {
+    setTimeout(() => {
+      router.push('/tabs/homework/hw-2');
+    }, 1000);
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* Top Section */}
+      <View style={styles.topSection}>
+        <View style={styles.headerRow}>
+          <Pressable onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color="#000" />
+          </Pressable>
+          <View style={styles.progressContainer}>
+            <View style={styles.progressBar}>
+              <View style={styles.progressFill} />
+            </View>
+          </View>
+        </View>
+        <Text style={styles.moduleInfo}>Booklet 2, Module 4 - Fruits</Text>
+      </View>
+
+      {/* Main Content */}
+      <View style={styles.mainContent}>
+        <Text style={styles.instruction}>Point and read</Text>
+        <View style={styles.contentArea}>
+          <Text style={styles.word}>panda</Text>
+          <View style={styles.audioIcon}>
+            <Ionicons name="volume-high" size={32} color="#fff" />
+          </View>
+        </View>
+      </View>
+
+      {/* Bottom Section */}
+      <View style={styles.bottomSection}>
+        <Pressable 
+          style={styles.nextButton}
+          onPress={handleNext}
+        >
+          <Text style={styles.nextButtonText}>Next</Text>
+          <Ionicons name="arrow-forward" size={20} color="#fff" />
+        </Pressable>
+      </View>
+    </SafeAreaView>
+  );
+}

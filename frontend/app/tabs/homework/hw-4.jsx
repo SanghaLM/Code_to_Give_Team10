@@ -1,61 +1,21 @@
-import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, SafeAreaView, Animated, PanResponder, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Pressable, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 export default function Hw4Screen() {
   const router = useRouter();
+  const [isCompleted, setIsCompleted] = useState(false);
 
-  const [dropped, setDropped] = useState(false);
-  const [selectedWord, setSelectedWord] = useState(null);
-  const [draggingIdx, setDraggingIdx] = useState(null);
-  const dropZone = useRef(null);
-  const options = ['play', 'eat', 'run'];
-  const pans = useRef(options.map(() => new Animated.ValueXY())).current;
+  const handleComplete = () => {
+    setIsCompleted(true);
+  };
 
-  const panResponders = options.map((opt, idx) =>
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => !dropped,
-      onPanResponderGrant: () => {
-        setDraggingIdx(idx);
-        pans[idx].setOffset({ x: pans[idx].x._value, y: pans[idx].y._value });
-        pans[idx].setValue({ x: 0, y: 0 });
-      },
-      onPanResponderMove: Animated.event([null, { dx: pans[idx].x, dy: pans[idx].y }], { useNativeDriver: false }),
-      onPanResponderRelease: (e, gesture) => {
-        pans[idx].flattenOffset();
-        const handleMiss = () => {
-          Animated.spring(pans[idx], { toValue: { x: 0, y: 0 }, useNativeDriver: false }).start();
-        };
-
-        if (dropZone.current && dropZone.current.measure) {
-          dropZone.current.measure((fx, fy, width, height, px, py) => {
-            const dropX = gesture.moveX || (e && e.nativeEvent && e.nativeEvent.pageX);
-            const dropY = gesture.moveY || (e && e.nativeEvent && e.nativeEvent.pageY);
-            if (dropX >= px && dropX <= px + width && dropY >= py && dropY <= py + height) {
-              // Only accept if correct answer
-              if (options[idx] === 'play') {
-                setDropped(true);
-                setSelectedWord(options[idx]);
-                // reset pan so tile disappears from its position
-                pans[idx].setValue({ x: 0, y: 0 });
-              } else {
-                handleMiss();
-              }
-            } else {
-              handleMiss();
-            }
-          });
-        } else {
-          handleMiss();
-        }
-
-        setDraggingIdx(null);
-      },
-    })
-  );
-  const screenWidth = Dimensions.get('window').width;
-  const sentenceFontSize = Math.max(18, Math.min(48, Math.floor(screenWidth / 9)));
+  const handleFinish = () => {
+    setTimeout(() => {
+      router.push('/tabs/homework/hw-end');
+    }, 1000);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -76,20 +36,49 @@ export default function Hw4Screen() {
 
       {/* Main Content */}
       <View style={styles.mainContent}>
-        <Text style={styles.instruction}>Complete the sentence</Text>
-        <View style={styles.sentenceRow}>
-          <Text style={[styles.word, { fontSize: sentenceFontSize }]}>I like to </Text>
-          <View
-            ref={dropZone}
-            style={[styles.dropZone, dropped && styles.dropZoneFilled]}
-            onLayout={() => { /* measured on drop via ref.measure */ }}
-          >
-            {dropped ? <Text style={[styles.dropText, { fontSize: Math.max(14, sentenceFontSize - 18) }]}>{selectedWord}</Text> : <Text style={[styles.blank, { fontSize: Math.max(14, sentenceFontSize - 18) }]}>____</Text>}
+        <Text style={styles.instruction}>Trace the letter</Text>
+        
+        <View style={styles.contentArea}>
+          <View style={styles.tracingContainer}>
+            <View style={styles.letterOutline}>
+              <Text style={styles.letterDots}>A</Text>
+              <View style={styles.tracePath}>
+                {/* Dotted outline of letter A */}
+                <View style={styles.dotRow}>
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                </View>
+                <View style={styles.dotRow}>
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                </View>
+                <View style={styles.dotRow}>
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
+                </View>
+              </View>
+            </View>
           </View>
-          <Text style={[styles.word, { fontSize: sentenceFontSize }]}> football</Text>
-        </View>
-        <View style={styles.audioIcon}>
-          <Ionicons name="volume-high" size={32} color="#fff" />
+
+          {!isCompleted && (
+            <Pressable style={styles.completeButton} onPress={handleComplete}>
+              <Text style={styles.completeButtonText}>Mark as Complete</Text>
+            </Pressable>
+          )}
+
+          {isCompleted && (
+            <Text style={styles.completedText}>Great job! Letter traced! 🎉</Text>
+          )}
         </View>
 
         <View style={styles.optionsRow}>
@@ -109,20 +98,11 @@ export default function Hw4Screen() {
 
       {/* Bottom Section */}
       <View style={styles.bottomSection}>
-        <Pressable
-          style={[styles.nextButton, !dropped && { opacity: 0.5 }]}
-          onPress={() => {
-            if (!dropped) return;
-            // reset state so returning resets the exercise
-            setDropped(false);
-            setSelectedWord(null);
-            setDraggingIdx(null);
-            pans.forEach(p => p.setValue({ x: 0, y: 0 }));
-            router.push('/tabs/homework/hw-end');
-          }}
-          disabled={!dropped}
+        <Pressable 
+          style={styles.finishButton}
+          onPress={handleFinish}
         >
-          <Text style={styles.nextButtonText}>Finish</Text>
+          <Text style={styles.finishButtonText}>Finish</Text>
           <Ionicons name="checkmark" size={20} color="#fff" />
         </Pressable>
       </View>
@@ -166,11 +146,10 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     marginBottom: 40,
+    fontFamily: 'BalsamiqSans_400Regular',
   },
   mainContent: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     paddingHorizontal: 20,
   },
   sentenceRow: {
@@ -185,67 +164,79 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#000',
     marginBottom: 40,
-    textAlign: 'center',
+    textAlign: 'left',
+    fontFamily: 'BalsamiqSans_400Regular',
   },
-  word: {
-    fontSize: 48,
+  contentArea: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tracingContainer: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  letterOutline: {
+    width: 200,
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  letterDots: {
+    fontSize: 120,
     fontWeight: 'bold',
-    color: '#007AFF',
-    marginBottom: 30,
-    textAlign: 'center',
+    color: '#000',
+    opacity: 0.1,
+    fontFamily: 'BalsamiqSans_400Regular',
   },
-  dropZone: {
-    minWidth: 80,
-    height: 48,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: '#bbb',
-    marginHorizontal: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-  },
-  dropZoneFilled: {
-    backgroundColor: '#34C759',
-  },
-  blank: { fontSize: 24, color: '#666' },
-  dropText: { fontSize: 22, color: '#fff', fontWeight: '700' },
-  audioIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#FF9500',
+  tracePath: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  optionsRow: {
+  dotRow: {
     flexDirection: 'row',
-    marginTop: 30,
-    gap: 12,
+    gap: 8,
+    marginVertical: 4,
   },
-  wordTile: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#000',
   },
-  tileText: {
+  completeButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 12,
+    marginBottom: 20,
+  },
+  completeButtonText: {
+    color: '#fff',
     fontSize: 18,
     fontWeight: '600',
+    fontFamily: 'BalsamiqSans_400Regular',
+  },
+  completedText: {
+    fontSize: 24,
+    color: '#10B981',
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+    fontFamily: 'BalsamiqSans_400Regular',
   },
   bottomSection: {
     paddingHorizontal: 20,
     paddingBottom: 40,
     alignItems: 'flex-end',
   },
-  nextButton: {
+  finishButton: {
     backgroundColor: '#34C759',
     paddingVertical: 15,
     paddingHorizontal: 30,
@@ -254,9 +245,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
-  nextButtonText: {
+  finishButtonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
+    fontFamily: 'BalsamiqSans_400Regular',
   },
 });
