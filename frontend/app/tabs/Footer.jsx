@@ -46,6 +46,11 @@ const TABS = {
     icon: require('../../assets/footer/rank-icon.png'),
     activeIcon: require('../../assets/footer/rank-icon-active.png'),
   },
+  progress: {
+    title: 'Progress',
+    icon: require('../../assets/footer/rank-icon.png'),
+    activeIcon: require('../../assets/footer/rank-icon-active.png'),
+  },
   profile: {
     title: 'Profile',
     icon: require('../../assets/footer/profile-icon.png'),
