@@ -1,10 +1,11 @@
 import React from 'react';
-import { Stack } from 'expo-router';
+import { Stack, Slot } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useFonts } from 'expo-font';
 import { BalsamiqSans_400Regular } from '@expo-google-fonts/balsamiq-sans';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import { UserProvider, useUser } from './userContext';
 
 const styles = StyleSheet.create({
   loadingContainer: {
@@ -13,6 +14,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+
+
+
+import Login from './Login';
+import { useState } from 'react';
+
+function MainRouter() {
+  const { role, isLoggedIn } = useUser();
+  if (!isLoggedIn) {
+    return <Login />;
+  }
+  if (role === 'teacher') {
+    // Teacher interface: stack with teacher tabs
+    return (
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="teacher" />
+      </Stack>
+    );
+  }
+  // Student interface: stack with student tabs
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="tabs" />
+    </Stack>
+  );
+}
 
 export default function App() {
   const [fontsLoaded, fontError] = useFonts({
@@ -30,7 +57,9 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <Stack screenOptions={{ headerShown: false }} />
+        <UserProvider>
+          <MainRouter />
+        </UserProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

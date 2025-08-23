@@ -332,7 +332,7 @@ export default function TaskScreen() {
                       {!module.completed && (
                         <Pressable
                           style={styles.submitButton}
-                          onPress={() => router.push('/submit')}
+                          onPress={() => router.push('/tabs/homework/hw-1')}
                         >
                           <Text style={styles.submitButtonText}>Submit</Text>
                         </Pressable>
