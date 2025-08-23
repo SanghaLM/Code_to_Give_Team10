@@ -4,10 +4,11 @@ import React, { createContext, useContext, useState } from 'react';
 const UserContext = createContext();
 
 export function UserProvider({ children }) {
-  // In a real app, fetch/set this from login or backend
-  const [role, setRole] = useState('teacher'); // default to student
+  const [role, setRole] = useState(null); 
+  const [username, setUsername] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   return (
-    <UserContext.Provider value={{ role, setRole }}>
+    <UserContext.Provider value={{ role, setRole, username, setUsername, isLoggedIn, setIsLoggedIn }}>
       {children}
     </UserContext.Provider>
   );

@@ -16,15 +16,29 @@ const styles = StyleSheet.create({
 });
 
 
+
+import Login from './Login';
+import { useState } from 'react';
+
 function MainRouter() {
-  const { role } = useUser();
-  // Route to teacher or student interface
-  if (role === 'teacher') {
-    // Teacher interface: show teacher tabs
-    return <Slot name="teacher" />;
+  const { role, isLoggedIn } = useUser();
+  if (!isLoggedIn) {
+    return <Login />;
   }
-  // Student interface: show default stack/tabs
-  return <Stack screenOptions={{ headerShown: false }} />;
+  if (role === 'teacher') {
+    // Teacher interface: stack with teacher tabs
+    return (
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="teacher" />
+      </Stack>
+    );
+  }
+  // Student interface: stack with student tabs
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="tabs" />
+    </Stack>
+  );
 }
 
 export default function App() {
