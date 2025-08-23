@@ -28,12 +28,7 @@ export default function TabLayout() {
           title: 'Rank',
         }}
       />
-      <Tabs.Screen
-        name="progress"
-        options={{
-          title: 'Progress',
-        }}
-      />
+
       <Tabs.Screen
         name="profile"
         options={{
