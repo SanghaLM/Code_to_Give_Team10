@@ -41,8 +41,8 @@ const TABS = {
     icon: require('../../assets/footer/web-icon.png'),
     activeIcon: require('../../assets/footer/web-icon-active.png'),
   },
-  rank: {
-    title: 'Rank',
+  leaderboard: {
+    title: 'Leaderboard',
     icon: require('../../assets/footer/rank-icon.png'),
     activeIcon: require('../../assets/footer/rank-icon-active.png'),
   },
