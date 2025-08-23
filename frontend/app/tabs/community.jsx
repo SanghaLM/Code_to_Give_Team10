@@ -1,20 +1,18 @@
-
-import React, { useState } from 'react';
-import { Dimensions } from 'react-native';
-import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
-import ForFun from './communityTabs/ForFun';
-import HomeworkHelp from './communityTabs/HomeworkHelp';
+import React, { useState } from "react";
+import { Dimensions } from "react-native";
+import { TabView, SceneMap, TabBar } from "react-native-tab-view";
+import ForFun from "./communityTabs/ForFun";
+import HomeworkHelp from "./communityTabs/HomeworkHelp";
 // Placeholder for MessageTeacher, you can replace with your actual component
-const MessageTeacher = () => null;
-
-const initialLayout = { width: Dimensions.get('window').width };
+import MessageTeacherRoute from "./MessageTeacherRoute"; // The WhatsApp-like chat
+const initialLayout = { width: Dimensions.get("window").width };
 
 export default function CommunityScreen() {
   const [index, setIndex] = useState(0);
   const [routes] = useState([
-    { key: 'forfun', title: 'For Fun' },
-    { key: 'homework', title: 'Homework Help' },
-    { key: 'teacher', title: 'Message a Teacher' },
+    { key: "forfun", title: "For Fun" },
+    { key: "homework", title: "Homework Help" },
+    { key: "teacher", title: "Message a Teacher" },
   ]);
 
   const renderScene = SceneMap({
@@ -29,12 +27,12 @@ export default function CommunityScreen() {
       renderScene={renderScene}
       onIndexChange={setIndex}
       initialLayout={initialLayout}
-      renderTabBar={props => (
+      renderTabBar={(props) => (
         <TabBar
           {...props}
-          indicatorStyle={{ backgroundColor: '#333' }}
-          style={{ backgroundColor: '#f5f5f5' }}
-          labelStyle={{ color: 'black', fontFamily: 'BalsamiqSans_400Regular' }}
+          indicatorStyle={{ backgroundColor: "#333" }}
+          style={{ backgroundColor: "#f5f5f5" }}
+          labelStyle={{ color: "black", fontFamily: "BalsamiqSans_400Regular" }}
         />
       )}
     />
