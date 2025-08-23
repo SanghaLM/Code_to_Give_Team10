@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import NewPublicPost from './NewPublicPost';
 import PublicPosts from './PublicPosts';
 import Modal from 'react-native-modal';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const initialPosts = [
 	{
@@ -91,7 +91,7 @@ const [reactedPostIds, setReactedPostIds] = useState([]); // Track posts reacted
 				onPress={() => setModalVisible(true)}
 				activeOpacity={0.8}
 			>
-				<Icon name="plus-circle" size={60} color="#1976d2" />
+				<Ionicons name="add" size={28} color="#fff" />
 			</TouchableOpacity> 
 			<Modal
 				isVisible={modalVisible}
@@ -108,13 +108,28 @@ const [reactedPostIds, setReactedPostIds] = useState([]); // Track posts reacted
 }
 
 const styles = StyleSheet.create({
-	container: { flex: 1, backgroundColor: '#f5f5f5', padding: 12 },
+	container: { 
+		flex: 1, 
+		backgroundColor: '#FFF4E7', 
+		paddingHorizontal: '5%',
+		paddingTop: 10,
+	},
 	fab: {
 		position: 'absolute',
-		right: 24,
+		right: '7%',
 		bottom: 32,
 		zIndex: 10,
 		elevation: 10,
+		backgroundColor: '#F7941F',
+		borderRadius: 30,
+		width: 60,
+		height: 60,
+		justifyContent: 'center',
+		alignItems: 'center',
+		shadowColor: '#F7941F',
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.3,
+		shadowRadius: 8,
 	},
 	modal: {
 		justifyContent: 'center',
@@ -122,19 +137,25 @@ const styles = StyleSheet.create({
 	},
 	modalContent: {
 		backgroundColor: '#fff',
-		borderRadius: 12,
-		padding: 20,
-		marginHorizontal: 24,
+		borderRadius: 16,
+		padding: 24,
+		marginHorizontal: '5%',
+		shadowColor: '#c7c7c7ff',
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.15,
+		shadowRadius: 8,
+		elevation: 8,
 	},
 	lastMessageContainer: {
 		alignItems: 'center',
 		marginTop: 8,
-		marginBottom: 80, // leave space for FAB
+		marginBottom: 100, // leave space for FAB
 	},
 	lastMessage: {
-		color: '#888',
+		color: '#666',
 		fontSize: 15,
 		textAlign: 'center',
 		paddingVertical: 8,
+		fontFamily: 'BalsamiqSans_400Regular',
 	},
 });
