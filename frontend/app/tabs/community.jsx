@@ -52,40 +52,45 @@ export default function CommunityScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#FFF4E7',
+    paddingTop: '12%',
   },
   tabView: {
     flex: 1,
   },
   tabBar: {
     backgroundColor: '#fff',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
+    elevation: 3,
+    shadowColor: '#c7c7c7ff',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
     shadowRadius: 4,
     borderBottomWidth: 1,
     borderBottomColor: '#e5e5e5',
+    marginHorizontal: '5%',
+    marginBottom: 10,
+    borderRadius: 12,
   },
   indicator: {
     backgroundColor: '#F7941F',
     height: 3,
+    borderRadius: 2,
   },
   tabLabel: {
-  fontFamily: 'BalsamiqSans_400Regular',
-  fontSize: 15,
+    fontFamily: 'BalsamiqSans_400Regular',
+    fontSize: 15,
     margin: 0,
     padding: 0,
   },
   tabLabelActive: {
-    color: '#000',
+    color: '#F7941F',
     fontWeight: '600',
   },
   tabLabelInactive: {
     color: '#6b7280',
   },
   tabStyle: {
-    paddingVertical: 10,
-    paddingHorizontal: 6,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
   },
 });
