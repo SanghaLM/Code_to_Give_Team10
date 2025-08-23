@@ -8,3 +8,7 @@ Open a terminal in the /backend directory and run npm install to install Express
 
 Execution:
 Run node server.js in the /backend directory. You will see console logs indicating a successful connection and successful data generation.
+
+How to run app:
+`cd Code_to_Give_Team10/frontend`
+To run app on Expo Go, use `npx expo start`
