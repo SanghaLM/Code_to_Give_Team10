@@ -36,8 +36,8 @@ const TABS = {
     icon: require('../../assets/footer/task-icon.png'),
     activeIcon: require('../../assets/footer/task-icon-active.png'),
   },
-  web: {
-    title: 'Web',
+  community: {
+    title: 'Community',
     icon: require('../../assets/footer/web-icon.png'),
     activeIcon: require('../../assets/footer/web-icon-active.png'),
   },

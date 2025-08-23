@@ -17,9 +17,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="web"
+        name="community"
         options={{
-          title: 'Web',
+          title: 'Community',
         }}
       />
       <Tabs.Screen
