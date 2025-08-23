@@ -28,6 +28,7 @@ export default function TabLayout() {
           title: 'Rank',
         }}
       />
+
       <Tabs.Screen
         name="profile"
         options={{
