@@ -1,7 +1,27 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Radar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  RadialLinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+// Register Chart.js components
+ChartJS.register(
+  RadialLinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip,
+  Legend
+);
 
 // Mock data for individual child progress
 const mockChildrenData = {
@@ -14,10 +34,27 @@ const mockChildrenData = {
     currentStreak: 7,
     longestStreak: 12,
     skills: {
-      pronunciation: { level: 3, progress: 0.75, xp: 450 },
-      fluency: { level: 2, progress: 0.40, xp: 280 },
-      confidence: { level: 4, progress: 0.20, xp: 520 }
+      alphabetRecognition: { level: 7, percentile: 85 },
+      phonemicAwareness: { level: 5, percentile: 65 },
+      consistency: { level: 8, percentile: 92 },
+      vocabulary: { level: 6, percentile: 75 },
+      timeliness: { level: 4, percentile: 45 },
+      pointAndRead: { level: 7, percentile: 88 }
     },
+    skillsHistory: [
+      {
+        date: "2024-11-01",
+        skills: { alphabetRecognition: 5, phonemicAwareness: 3, consistency: 6, vocabulary: 4, timeliness: 3, pointAndRead: 5 }
+      },
+      {
+        date: "2024-11-15",
+        skills: { alphabetRecognition: 6, phonemicAwareness: 4, consistency: 7, vocabulary: 5, timeliness: 3, pointAndRead: 6 }
+      },
+      {
+        date: "2024-12-01",
+        skills: { alphabetRecognition: 7, phonemicAwareness: 5, consistency: 8, vocabulary: 6, timeliness: 4, pointAndRead: 7 }
+      }
+    ],
     recentAchievements: [
       { id: 1, title: "Streak Master", description: "7 days in a row!", icon: "flame", color: "#FF6B35" },
       { id: 2, title: "Pronunciation Pro", description: "Reached Level 3!", icon: "star", color: "#F7941F" },
@@ -43,10 +80,27 @@ const mockChildrenData = {
     currentStreak: 4,
     longestStreak: 8,
     skills: {
-      pronunciation: { level: 2, progress: 0.60, xp: 320 },
-      fluency: { level: 3, progress: 0.80, xp: 480 },
-      confidence: { level: 2, progress: 0.30, xp: 230 }
+      alphabetRecognition: { level: 4, percentile: 55 },
+      phonemicAwareness: { level: 6, percentile: 78 },
+      consistency: { level: 3, percentile: 35 },
+      vocabulary: { level: 5, percentile: 68 },
+      timeliness: { level: 2, percentile: 25 },
+      pointAndRead: { level: 4, percentile: 52 }
     },
+    skillsHistory: [
+      {
+        date: "2024-11-01",
+        skills: { alphabetRecognition: 3, phonemicAwareness: 4, consistency: 2, vocabulary: 3, timeliness: 1, pointAndRead: 3 }
+      },
+      {
+        date: "2024-11-15",
+        skills: { alphabetRecognition: 3, phonemicAwareness: 5, consistency: 2, vocabulary: 4, timeliness: 2, pointAndRead: 3 }
+      },
+      {
+        date: "2024-12-01",
+        skills: { alphabetRecognition: 4, phonemicAwareness: 6, consistency: 3, vocabulary: 5, timeliness: 2, pointAndRead: 4 }
+      }
+    ],
     recentAchievements: [
       { id: 1, title: "Fluency Star", description: "Reached Level 3 in Fluency!", icon: "star", color: "#3b82f6" },
       { id: 2, title: "Consistent Learner", description: "4 days streak!", icon: "flame", color: "#FF6B35" }
@@ -168,26 +222,79 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  skillsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
   sectionTitle: {
     fontSize: 20,
     fontFamily: 'BalsamiqSans_400Regular',
     color: '#000',
-    marginBottom: 15,
     fontWeight: 'bold',
   },
-  skillItem: {
-    marginBottom: 20,
-  },
-  skillHeader: {
+  historyButton: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    backgroundColor: '#FFF4E7',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#F7941F',
   },
-  skillName: {
+  historyButtonText: {
+    fontSize: 14,
+    fontFamily: 'BalsamiqSans_400Regular',
+    color: '#F7941F',
+    fontWeight: '600',
+    marginLeft: 5,
+  },
+  chartContainer: {
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  chartNote: {
     fontSize: 16,
     fontFamily: 'BalsamiqSans_400Regular',
-    color: '#000',
+    color: '#666',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  radarChartContainer: {
+    width: '100%',
+    height: 300,
+    marginVertical: 20,
+    paddingHorizontal: 10,
+  },
+  skillsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    paddingHorizontal: 10,
+  },
+  skillItem: {
+    width: '48%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    padding: 8,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+  },
+  skillDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  skillName: {
+    flex: 1,
+    fontSize: 12,
+    fontFamily: 'BalsamiqSans_400Regular',
+    color: '#333',
     fontWeight: '600',
   },
   skillLevel: {
@@ -196,21 +303,41 @@ const styles = StyleSheet.create({
     color: '#F7941F',
     fontWeight: 'bold',
   },
-  progressBarContainer: {
-    height: 12,
-    backgroundColor: '#f3f4f6',
-    borderRadius: 6,
-    overflow: 'hidden',
+  summaryContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 15,
   },
-  progressBar: {
-    height: '100%',
-    borderRadius: 6,
+  summaryItem: {
+    flex: 1,
+    backgroundColor: '#FFF4E7',
+    borderRadius: 12,
+    padding: 15,
+    marginHorizontal: 5,
   },
-  skillXP: {
+  summaryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  summaryTitle: {
+    fontSize: 14,
+    fontFamily: 'BalsamiqSans_400Regular',
+    color: '#666',
+    fontWeight: '600',
+    marginLeft: 5,
+  },
+  summarySkill: {
+    fontSize: 16,
+    fontFamily: 'BalsamiqSans_400Regular',
+    color: '#000',
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  summaryDetails: {
     fontSize: 12,
     fontFamily: 'BalsamiqSans_400Regular',
-    color: '#6b7280',
-    marginTop: 4,
+    color: '#666',
   },
 
   // Streak Section
@@ -349,6 +476,56 @@ export default function ChildProgressScreen() {
   const router = useRouter();
   const { childName } = useLocalSearchParams();
   const childData = mockChildrenData[childName] || mockChildrenData["Emma"];
+  const [showHistoricalData, setShowHistoricalData] = useState(false);
+
+  // Skill area definitions with colors matching the app theme
+  const skillAreas = [
+    { key: 'alphabetRecognition', name: 'Alphabet Recognition', color: '#F7941F' },
+    { key: 'phonemicAwareness', name: 'Phonemic Awareness', color: '#9957B3' },
+    { key: 'consistency', name: 'Consistency', color: '#0340A4' },
+    { key: 'vocabulary', name: 'Vocabulary', color: '#10b981' },
+    { key: 'timeliness', name: 'Timeliness', color: '#3b82f6' },
+    { key: 'pointAndRead', name: 'Point and Read', color: '#8b5cf6' }
+  ];
+
+
+
+  // Get skill summary for strengths and adventures
+  const getSkillSummary = () => {
+    const skillEntries = Object.entries(childData.skills);
+    const strongest = skillEntries.reduce((max, current) => 
+      current[1].percentile > max[1].percentile ? current : max
+    );
+    const adventure = skillEntries.reduce((min, current) => 
+      current[1].percentile < min[1].percentile ? current : min
+    );
+    
+    const strongestArea = skillAreas.find(area => area.key === strongest[0]);
+    const adventureArea = skillAreas.find(area => area.key === adventure[0]);
+    
+    // Helper function to get percentile description
+    const getPercentileDescription = (percentile) => {
+      if (percentile >= 90) return "over 90th percentile";
+      if (percentile >= 80) return "over 80th percentile";
+      if (percentile >= 70) return "over 70th percentile";
+      if (percentile >= 60) return "over 60th percentile";
+      return "developing well";
+    };
+    
+    return {
+      strongest: { 
+        area: strongestArea, 
+        percentile: strongest[1].percentile, 
+        level: strongest[1].level,
+        description: getPercentileDescription(strongest[1].percentile)
+      },
+      adventure: { 
+        area: adventureArea, 
+        percentile: adventure[1].percentile, 
+        level: adventure[1].level 
+      }
+    };
+  };
 
   const renderCharacterSection = () => (
     <View style={styles.characterCard}>
@@ -370,34 +547,228 @@ export default function ChildProgressScreen() {
     </View>
   );
 
-  const renderSkillsSection = () => (
-    <View style={styles.skillsCard}>
-      <Text style={styles.sectionTitle}>{childData.name}'s Skills</Text>
-      {Object.entries(childData.skills).map(([skillName, skill]) => (
-        <View key={skillName} style={styles.skillItem}>
-          <View style={styles.skillHeader}>
-            <Text style={styles.skillName}>
-              {skillName.charAt(0).toUpperCase() + skillName.slice(1)}
-            </Text>
-            <Text style={styles.skillLevel}>Level {skill.level}</Text>
-          </View>
-          <View style={styles.progressBarContainer}>
-            <View 
-              style={[
-                styles.progressBar, 
-                { 
-                  width: `${skill.progress * 100}%`,
-                  backgroundColor: skillName === 'pronunciation' ? '#10b981' : 
-                                 skillName === 'fluency' ? '#3b82f6' : '#8b5cf6'
-                }
-              ]} 
+  // Prepare chart data for Chart.js radar chart
+  const prepareChartData = () => {
+    const labels = skillAreas.map(area => area.name);
+    const currentData = skillAreas.map(area => childData.skills[area.key]?.level || 1);
+    
+    const datasets = [{
+      label: 'Current Level',
+      data: currentData,
+      fill: true,
+      backgroundColor: 'rgba(247, 148, 31, 0.2)',
+      borderColor: '#F7941F',
+      pointBackgroundColor: '#F7941F',
+      pointBorderColor: '#fff',
+      pointHoverBackgroundColor: '#fff',
+      pointHoverBorderColor: '#F7941F',
+      borderWidth: 2,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+    }];
+
+    // Add historical data if toggled on
+    if (showHistoricalData && childData.skillsHistory) {
+      const colors = ['rgba(153, 87, 179, 0.2)', 'rgba(3, 64, 164, 0.2)', 'rgba(16, 185, 129, 0.2)'];
+      const borderColors = ['#9957B3', '#0340A4', '#10b981'];
+      
+      // Show up to 3 historical data points
+      childData.skillsHistory.slice(-3).forEach((historyPoint, index) => {
+        const historicalData = skillAreas.map(area => historyPoint.skills[area.key] || 1);
+        datasets.push({
+          label: new Date(historyPoint.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          data: historicalData,
+          fill: true,
+          backgroundColor: colors[index] || colors[0],
+          borderColor: borderColors[index] || borderColors[0],
+          pointBackgroundColor: borderColors[index] || borderColors[0],
+          pointBorderColor: '#fff',
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: borderColors[index] || borderColors[0],
+          borderWidth: 2,
+          pointRadius: 3,
+          pointHoverRadius: 5,
+        });
+      });
+    }
+
+    return { labels, datasets };
+  };
+
+  // Chart options with relative scaling
+  const getChartOptions = () => {
+    const allLevels = [];
+    
+    // Collect all current levels
+    skillAreas.forEach(area => {
+      allLevels.push(childData.skills[area.key]?.level || 1);
+    });
+    
+    // If showing historical data, include those levels too
+    if (showHistoricalData && childData.skillsHistory) {
+      childData.skillsHistory.forEach(historyPoint => {
+        skillAreas.forEach(area => {
+          allLevels.push(historyPoint.skills[area.key] || 1);
+        });
+      });
+    }
+    
+    const minLevel = Math.min(...allLevels);
+    const maxLevel = Math.max(...allLevels);
+    
+    // Create relative scale - expand range slightly for better visualization
+    const range = maxLevel - minLevel;
+    const suggestedMin = Math.max(1, minLevel - Math.ceil(range * 0.1));
+    const suggestedMax = Math.min(10, maxLevel + Math.ceil(range * 0.1));
+
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            font: {
+              family: 'BalsamiqSans_400Regular',
+              size: 12,
+            },
+            color: '#666',
+            padding: 15,
+          },
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          titleColor: '#fff',
+          bodyColor: '#fff',
+          borderColor: '#F7941F',
+          borderWidth: 1,
+        },
+      },
+      scales: {
+        r: {
+          angleLines: {
+            display: true,
+            color: 'rgba(0, 0, 0, 0.1)',
+            lineWidth: 1,
+          },
+          grid: {
+            color: 'rgba(0, 0, 0, 0.1)',
+            lineWidth: 1,
+          },
+          pointLabels: {
+            font: {
+              family: 'BalsamiqSans_400Regular',
+              size: 11,
+              weight: '600',
+            },
+            color: '#333',
+            padding: 10,
+          },
+          ticks: {
+            display: true,
+            font: {
+              family: 'BalsamiqSans_400Regular',
+              size: 10,
+            },
+            color: '#999',
+            backdropColor: 'rgba(255, 255, 255, 0.8)',
+            backdropPadding: 2,
+          },
+          suggestedMin: suggestedMin,
+          suggestedMax: suggestedMax,
+          beginAtZero: false,
+        },
+      },
+      elements: {
+        line: {
+          borderWidth: 2,
+        },
+        point: {
+          radius: 4,
+          hoverRadius: 6,
+        },
+      },
+    };
+  };
+
+  const renderSkillsSection = () => {
+    const summary = getSkillSummary();
+    const chartData = prepareChartData();
+    const chartOptions = getChartOptions();
+    
+    return (
+      <View style={styles.skillsCard}>
+        <View style={styles.skillsHeader}>
+          <Text style={styles.sectionTitle}>{childData.name}'s Skills</Text>
+          <Pressable 
+            style={styles.historyButton}
+            onPress={() => setShowHistoricalData(!showHistoricalData)}
+          >
+            <Ionicons 
+              name={showHistoricalData ? "bar-chart" : "trending-up"} 
+              size={20} 
+              color="#F7941F" 
             />
-          </View>
-          <Text style={styles.skillXP}>{skill.xp} XP</Text>
+            <Text style={styles.historyButtonText}>
+              {showHistoricalData ? "Current" : "Progress"}
+            </Text>
+          </Pressable>
         </View>
-      ))}
-    </View>
-  );
+
+        {/* Chart.js Radar Chart */}
+        <View style={styles.chartContainer}>
+          <Text style={styles.chartNote}>
+            📊 Skills Overview - {showHistoricalData ? 'Progress Over Time' : 'Current Levels'}
+          </Text>
+          
+          <View style={styles.radarChartContainer}>
+            <Radar data={chartData} options={chartOptions} />
+          </View>
+          
+          {/* Skill Levels Display */}
+          <View style={styles.skillsGrid}>
+            {skillAreas.map((area, index) => {
+              const currentSkill = childData.skills[area.key];
+              const level = currentSkill ? currentSkill.level : 1;
+              
+              return (
+                <View key={area.key} style={styles.skillItem}>
+                  <View style={[styles.skillDot, { backgroundColor: area.color }]} />
+                  <Text style={styles.skillName}>{area.name}</Text>
+                  <Text style={styles.skillLevel}>Level {level}</Text>
+                </View>
+              );
+            })}
+          </View>
+        </View>
+
+        {/* Skills Summary */}
+        <View style={styles.summaryContainer}>
+          <View style={styles.summaryItem}>
+            <View style={styles.summaryHeader}>
+              <Ionicons name="trophy" size={20} color="#FFD700" />
+              <Text style={styles.summaryTitle}>Biggest Strength</Text>
+            </View>
+            <Text style={styles.summarySkill}>{summary.strongest.area.name}</Text>
+            <Text style={styles.summaryDetails}>
+              Level {summary.strongest.level} • {summary.strongest.description}
+            </Text>
+          </View>
+          
+          <View style={styles.summaryItem}>
+            <View style={styles.summaryHeader}>
+              <Ionicons name="rocket" size={20} color="#F7941F" />
+              <Text style={styles.summaryTitle}>Next Adventure</Text>
+            </View>
+            <Text style={styles.summarySkill}>{summary.adventure.area.name}</Text>
+            <Text style={styles.summaryDetails}>
+              Level {summary.adventure.level} • Great potential to grow!
+            </Text>
+          </View>
+        </View>
+      </View>
+    );
+  };
 
   const renderStreakSection = () => (
     <View style={styles.streakCard}>
