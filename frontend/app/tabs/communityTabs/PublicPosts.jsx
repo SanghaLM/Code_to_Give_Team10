@@ -62,7 +62,7 @@ function Post({ post, onReact, onAddComment }) {
 			</Modal>
 			<Text style={styles.content}>{post.text}</Text>
 			{post.image ? (
-				<Image source={{ uri: post.image }} style={styles.postImage} />
+				<Image source={typeof post.image === 'string' ? { uri: post.image } : post.image} style={styles.postImage} />
 			) : null}
 			<View style={styles.actions}>
 				<TouchableOpacity onPress={onReact}>
