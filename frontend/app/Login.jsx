@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-
+import { View, Text, TextInput, StyleSheet, Alert, Pressable, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useUser } from './userContext';
 
 
@@ -47,44 +47,97 @@ export default function Login() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{isCreating ? 'Create Account' : 'Login'}</Text>
-      {isCreating && (
-        <Text style={styles.instructions}>
-          All fields are required. Set your own username and password for logging in later. The access code is provided by the administrators.
-        </Text>
-      )}
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsernameInput}
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      {isCreating && (
-        <TextInput
-          style={styles.input}
-          placeholder="Access Code (from administrator)"
-          value={accessCode}
-          onChangeText={setAccessCode}
-        />
-      )}
-      <Button
-        title={isCreating ? 'Create Account' : 'Login'}
-        onPress={isCreating ? handleCreateAccount : handleLogin}
-      />
-      <Text
-        style={styles.switchText}
-        onPress={() => setIsCreating(!isCreating)}
+      <ScrollView 
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
       >
-        {isCreating ? 'Already have an account? Login' : 'Need an account? Create one'}
-      </Text>
+        {/* Header Section */}
+        <View style={styles.headerSection}>
+          <View style={styles.logoContainer}>
+            <Text style={styles.logoEmoji}>🎓</Text>
+            <Text style={styles.appName}>ReachOut</Text>
+          </View>
+          <Text style={styles.tagline}>Your Learning Journey Starts Here</Text>
+        </View>
+
+        {/* Login Card */}
+        <View style={styles.loginCard}>
+          <Text style={styles.title}>
+            {isCreating ? 'Create Account' : 'Welcome Back!'}
+          </Text>
+          
+          {isCreating && (
+            <View style={styles.instructionsCard}>
+              <Ionicons name="information-circle" size={20} color="#F7941F" />
+              <Text style={styles.instructions}>
+                All fields are required. Set your own username and password for logging in later. The access code is provided by the administrators.
+              </Text>
+            </View>
+          )}
+
+          {/* Input Fields */}
+          <View style={styles.inputContainer}>
+            <Ionicons name="person" size={20} color="#6b7280" style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Username"
+              value={username}
+              onChangeText={setUsernameInput}
+              autoCapitalize="none"
+              placeholderTextColor="#9ca3af"
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Ionicons name="lock-closed" size={20} color="#6b7280" style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              placeholderTextColor="#9ca3af"
+            />
+          </View>
+
+          {isCreating && (
+            <View style={styles.inputContainer}>
+              <Ionicons name="key" size={20} color="#6b7280" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Access Code (from administrator)"
+                value={accessCode}
+                onChangeText={setAccessCode}
+                placeholderTextColor="#9ca3af"
+              />
+            </View>
+          )}
+
+          {/* Login Button */}
+          <Pressable
+            style={styles.loginButton}
+            onPress={isCreating ? handleCreateAccount : handleLogin}
+          >
+            <Text style={styles.loginButtonText}>
+              {isCreating ? 'Create Account' : 'Login'}
+            </Text>
+            <Ionicons name="arrow-forward" size={20} color="#fff" />
+          </Pressable>
+        </View>
+
+        {/* Switch Mode */}
+        <Pressable
+          style={styles.switchContainer}
+          onPress={() => setIsCreating(!isCreating)}
+        >
+          <Text style={styles.switchText}>
+            {isCreating ? 'Already have an account? ' : 'Need an account? '}
+          </Text>
+          <Text style={styles.switchLink}>
+            {isCreating ? 'Login' : 'Create one'}
+          </Text>
+        </Pressable>
+      </ScrollView>
     </View>
   );
 }
@@ -92,34 +145,161 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#FFF4E7',
+  },
+  scrollContainer: {
+    flexGrow: 1,
     justifyContent: 'center',
+    paddingHorizontal: '5%',
+    paddingVertical: '10%',
+  },
+
+  // Header Section
+  headerSection: {
     alignItems: 'center',
-    padding: 20,
+    marginBottom: 40,
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  logoEmoji: {
+    fontSize: 40,
+    marginRight: 10,
+  },
+  appName: {
+    fontSize: 32,
+    fontFamily: 'BalsamiqSans_400Regular',
+    color: '#000',
+    fontWeight: 'bold',
+  },
+  tagline: {
+    fontSize: 16,
+    fontFamily: 'BalsamiqSans_400Regular',
+    color: '#6b7280',
+    textAlign: 'center',
+  },
+
+  // Login Card
+  loginCard: {
     backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 24,
+    marginBottom: 20,
+    shadowColor: '#c7c7c7ff',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   title: {
     fontSize: 24,
+    fontFamily: 'BalsamiqSans_400Regular',
+    color: '#000',
     fontWeight: 'bold',
+    textAlign: 'center',
     marginBottom: 20,
+  },
+
+  // Instructions
+  instructionsCard: {
+    flexDirection: 'row',
+    backgroundColor: '#FFF4E7',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 20,
+    alignItems: 'flex-start',
   },
   instructions: {
     fontSize: 14,
-    color: '#444',
-    marginBottom: 15,
-    textAlign: 'center',
+    fontFamily: 'BalsamiqSans_400Regular',
+    color: '#6b7280',
+    marginLeft: 10,
+    flex: 1,
+    lineHeight: 20,
+  },
+
+  // Input Fields
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f9fafb',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  inputIcon: {
+    marginRight: 12,
   },
   input: {
-    width: '100%',
-    height: 40,
-    borderColor: '#ccc',
+    flex: 1,
+    fontSize: 16,
+    fontFamily: 'BalsamiqSans_400Regular',
+    color: '#000',
+    paddingVertical: 12,
+  },
+
+  // Login Button
+  loginButton: {
+    backgroundColor: '#F7941F',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 12,
+    marginTop: 8,
+    marginBottom: 20,
+  },
+  loginButtonText: {
+    fontSize: 18,
+    fontFamily: 'BalsamiqSans_400Regular',
+    color: '#fff',
+    fontWeight: 'bold',
+    marginRight: 8,
+  },
+
+  // Demo Info
+  demoCard: {
+    backgroundColor: '#f0f9ff',
+    padding: 16,
+    borderRadius: 12,
     borderWidth: 1,
-    borderRadius: 5,
-    marginBottom: 15,
-    paddingHorizontal: 10,
+    borderColor: '#e0f2fe',
+  },
+  demoTitle: {
+    fontSize: 16,
+    fontFamily: 'BalsamiqSans_400Regular',
+    color: '#0369a1',
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  demoText: {
+    fontSize: 14,
+    fontFamily: 'BalsamiqSans_400Regular',
+    color: '#0284c7',
+    marginBottom: 4,
+  },
+
+  // Switch Mode
+  switchContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 16,
   },
   switchText: {
-    marginTop: 15,
-    color: '#007bff',
-    textDecorationLine: 'underline',
+    fontSize: 16,
+    fontFamily: 'BalsamiqSans_400Regular',
+    color: '#6b7280',
+  },
+  switchLink: {
+    fontSize: 16,
+    fontFamily: 'BalsamiqSans_400Regular',
+    color: '#F7941F',
+    fontWeight: 'bold',
   },
 });
