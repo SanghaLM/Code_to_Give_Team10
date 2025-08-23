@@ -110,6 +110,7 @@ export default function PublicPosts({ posts, onReact, onAddComment }) {
 					onAddComment={comment => onAddComment(item.id, comment)}
 				/>
 			)}
+			ListFooterComponent={<View style={{ height: 80 }} />} // Spacer for footer message and FAB
 			contentContainerStyle={{ paddingBottom: 24 }}
 		/>
 	);

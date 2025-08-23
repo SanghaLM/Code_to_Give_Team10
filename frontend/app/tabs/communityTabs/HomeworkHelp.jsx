@@ -33,8 +33,9 @@ const initialPosts = [
 ];
 
 export default function HomeworkHelp() {
-	const [posts, setPosts] = useState(initialPosts);
-	const [modalVisible, setModalVisible] = useState(false);
+const [posts, setPosts] = useState(initialPosts);
+const [modalVisible, setModalVisible] = useState(false);
+const [reactedPostIds, setReactedPostIds] = useState([]); // Track posts reacted to
 
 	const handleAddPost = (text, image) => {
 		setPosts([
@@ -54,11 +55,13 @@ export default function HomeworkHelp() {
 	};
 
 	const handleReact = postId => {
+		if (reactedPostIds.includes(postId)) return; // Prevent multiple reactions
 		setPosts(posts.map(post =>
 			post.id === postId
 				? { ...post, reactions: post.reactions + 1 }
 				: post
 		));
+		setReactedPostIds([...reactedPostIds, postId]);
 	};
 
 	const handleAddComment = (postId, commentText) => {
@@ -82,13 +85,14 @@ export default function HomeworkHelp() {
 	return (
 		<View style={styles.container}>
 			<PublicPosts posts={posts} onReact={handleReact} onAddComment={handleAddComment} />
+
 			<TouchableOpacity
 				style={styles.fab}
 				onPress={() => setModalVisible(true)}
 				activeOpacity={0.8}
 			>
 				<Icon name="plus-circle" size={60} color="#1976d2" />
-			</TouchableOpacity>
+			</TouchableOpacity> 
 			<Modal
 				isVisible={modalVisible}
 				onBackdropPress={() => setModalVisible(false)}
@@ -121,5 +125,16 @@ const styles = StyleSheet.create({
 		borderRadius: 12,
 		padding: 20,
 		marginHorizontal: 24,
+	},
+	lastMessageContainer: {
+		alignItems: 'center',
+		marginTop: 8,
+		marginBottom: 80, // leave space for FAB
+	},
+	lastMessage: {
+		color: '#888',
+		fontSize: 15,
+		textAlign: 'center',
+		paddingVertical: 8,
 	},
 });
