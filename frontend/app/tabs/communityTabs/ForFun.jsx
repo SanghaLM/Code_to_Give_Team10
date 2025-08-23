@@ -35,6 +35,7 @@ const initialPosts = [
 export default function ForFun() {
 	const [posts, setPosts] = useState(initialPosts);
 	const [modalVisible, setModalVisible] = useState(false);
+	const [reactedPostIds, setReactedPostIds] = useState([]); // Track posts reacted to
 
 	const handleAddPost = (text, image) => {
 		setPosts([
@@ -54,11 +55,13 @@ export default function ForFun() {
 	};
 
 	const handleReact = postId => {
+		if (reactedPostIds.includes(postId)) return; // Prevent multiple reactions
 		setPosts(posts.map(post =>
 			post.id === postId
 				? { ...post, reactions: post.reactions + 1 }
 				: post
 		));
+		setReactedPostIds([...reactedPostIds, postId]);
 	};
 
 	const handleAddComment = (postId, commentText) => {
@@ -121,5 +124,16 @@ const styles = StyleSheet.create({
 		borderRadius: 12,
 		padding: 20,
 		marginHorizontal: 24,
+	},
+	lastMessageContainer: {
+		alignItems: 'center',
+		marginTop: 8,
+		marginBottom: 80, // leave space for FAB
+	},
+	lastMessage: {
+		color: '#888',
+		fontSize: 15,
+		textAlign: 'center',
+		paddingVertical: 8,
 	},
 });
