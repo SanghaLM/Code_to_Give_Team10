@@ -1,36 +1,39 @@
-import React from 'react';
-import { Stack, Slot } from 'expo-router';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useFonts } from 'expo-font';
+import React from "react";
+import { Stack, Slot } from "expo-router";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useFonts } from "expo-font";
 import {
   BalsamiqSans_400Regular,
   BalsamiqSans_400Regular_Italic,
   BalsamiqSans_700Bold,
   BalsamiqSans_700Bold_Italic,
-} from '@expo-google-fonts/balsamiq-sans';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
-import { UserProvider, useUser } from './userContext';
+} from "@expo-google-fonts/balsamiq-sans";
+import { ActivityIndicator, View, StyleSheet } from "react-native";
+import { UserProvider, useUser } from "./userContext";
+import Login from "./Login";
+import RegisterChildScreen from "./RegisterChildScreen";
 
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 
-
-
-import Login from './Login';
-import { useState } from 'react';
-
 function MainRouter() {
-  const { role, isLoggedIn } = useUser();
+  const { role, isLoggedIn, childProfiles } = useUser();
+
   if (!isLoggedIn) {
     return <Login />;
   }
-  if (role === 'teacher') {
+
+  if (role === "parent" && (!childProfiles || childProfiles.length === 0)) {
+    return <RegisterChildScreen />;
+  }
+
+  if (role === "teacher") {
     // Teacher interface: stack with teacher tabs
     return (
       <Stack screenOptions={{ headerShown: false }}>
@@ -38,7 +41,8 @@ function MainRouter() {
       </Stack>
     );
   }
-  // Student interface: stack with student tabs
+
+  // Parent with children or student interface: stack with student tabs
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="tabs" />
@@ -57,7 +61,7 @@ export default function App() {
   if (!fontsLoaded && !fontError) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#3b82f6" />
+        <ActivityIndicator size="large" color="#F7941F" />
       </View>
     );
   }
