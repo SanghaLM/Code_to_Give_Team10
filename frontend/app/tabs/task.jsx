@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 10,
   },
   modalTitle: {
     fontSize: 20,
@@ -214,9 +214,13 @@ const styles = StyleSheet.create({
   modalDescription: {
     fontSize: 16,
     color: '#666',
-    textAlign: 'center',
-    marginBottom: 24,
+    textAlign: 'left',
+    marginBottom: 13,
     fontFamily: 'BalsamiqSans_400Regular',
+  },
+  moduleHighlight: {
+    color: '#F7941F',
+    fontWeight: '600',
   },
   optionContainer: {
     gap: 12,
@@ -225,10 +229,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#f8f9fa',
-    padding: 16,
+    paddingLeft: 17,
+    paddingRight: 15,
+    paddingTop: 12,
+    paddingBottom: 12,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#e1e5e9',
   },
   optionIcon: {
     marginRight: 16,
@@ -240,7 +245,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: '#000',
-    marginBottom: 4,
+    marginBottom: 2,
     fontFamily: 'BalsamiqSans_400Regular',
   },
   optionSubtitle: {
@@ -463,7 +468,8 @@ export default function TaskScreen() {
             </View>
             
             <Text style={styles.modalDescription}>
-              How would you like to complete your homework?
+              How would you like to complete {' '} 
+              <Text style={styles.moduleHighlight}>Booklet 2, Module 4 - Fruits</Text> exercise?
             </Text>
             
             <View style={styles.optionContainer}>
