@@ -463,6 +463,7 @@ exports.getSubmissionByHomework = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+<<<<<<< HEAD
 
 exports.resetHomework = async (req, res) => {
   console.log('resetHomework request:', req.params, 'for user:', req.user.id);
@@ -516,6 +517,8 @@ exports.resetHomework = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+=======
+>>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
 exports.requestTeacher = async (req, res) => {
   console.log("requestTeacher request:", req.params, req.body);
   try {

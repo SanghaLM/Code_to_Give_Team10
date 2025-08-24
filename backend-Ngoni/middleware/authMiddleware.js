@@ -15,6 +15,7 @@ const authMiddleware = (req, res, next) => {
   }
 
   try {
+<<<<<<< HEAD
     // Demo tokens: support local bypass tokens used by the mobile app during development
     if (token === 'local-teacher-token') {
       req.user = { id: 'local-teacher', role: 'teacher' };
@@ -24,6 +25,8 @@ const authMiddleware = (req, res, next) => {
       req.user = { id: 'local-parent', role: 'parent' };
       return next();
     }
+=======
+>>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log("Token verified, user:", decoded);
     req.user = decoded; // contains { id, role }

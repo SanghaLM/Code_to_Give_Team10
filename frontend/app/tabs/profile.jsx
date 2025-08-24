@@ -68,10 +68,9 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#000',
     marginBottom: 15,
-    fontWeight: 'bold',
   },
   tapHint: {
     fontSize: 14,
@@ -98,9 +97,8 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 16,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#000',
-    fontWeight: '600',
     flex: 1,
   },
 
@@ -157,9 +155,8 @@ const styles = StyleSheet.create({
   },
   levelText: {
     fontSize: 14,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#fff',
-    fontWeight: 'bold',
   },
 
   // Points Section
@@ -185,9 +182,8 @@ const styles = StyleSheet.create({
   },
   pointsText: {
     fontSize: 20,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#9957B3',
-    fontWeight: 'bold',
     marginLeft: 8,
   },
 
@@ -212,9 +208,8 @@ const styles = StyleSheet.create({
   },
   friendsNames: {
     fontSize: 16,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#F7941F',
-    fontWeight: 'bold',
   },
 });
 

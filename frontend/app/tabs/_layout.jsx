@@ -23,9 +23,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="rank"
+        name="leaderboard"
         options={{
-          title: 'Rank',
+          title: 'Leaderboard',
         }}
       />
 

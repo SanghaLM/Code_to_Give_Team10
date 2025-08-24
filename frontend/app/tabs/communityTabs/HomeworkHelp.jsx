@@ -2,12 +2,41 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import NewPublicPost from './NewPublicPost';
 import PublicPosts from './PublicPosts';
 import Modal from 'react-native-modal';
+<<<<<<< HEAD
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as api from '../../api';
 import { useUser } from '../../userContext';
+=======
+
+const initialPosts = [
+	{
+		id: '1',
+		username: 'Alice',
+		avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
+		text: 'How do I solve this math problem?',
+		image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
+		reactions: 2,
+		comments: [
+			{ id: 'c1', username: 'Bob', text: 'Try using the quadratic formula!' },
+		],
+		timestamp: '2h ago',
+	},
+	{
+		id: '2',
+		username: 'Charlie',
+		avatar: 'https://randomuser.me/api/portraits/men/2.jpg',
+		text: 'Anyone finished the science homework?',
+		image: null,
+		reactions: 1,
+		comments: [],
+		timestamp: '1h ago',
+	},
+];
+>>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
 
 export default function HomeworkHelp() {
 	const [posts, setPosts] = useState([]);
@@ -74,8 +103,13 @@ export default function HomeworkHelp() {
 				onPress={() => setModalVisible(true)}
 				activeOpacity={0.8}
 			>
+<<<<<<< HEAD
 				<Icon name="plus-circle" size={60} color="#1976d2" />
 			</TouchableOpacity>
+=======
+				<Ionicons name="add" size={28} color="#fff" />
+			</TouchableOpacity> 
+>>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
 			<Modal
 				isVisible={modalVisible}
 				onBackdropPress={() => setModalVisible(false)}
@@ -91,13 +125,28 @@ export default function HomeworkHelp() {
 }
 
 const styles = StyleSheet.create({
-	container: { flex: 1, backgroundColor: '#f5f5f5', padding: 12 },
+	container: { 
+		flex: 1, 
+		backgroundColor: '#FFF4E7', 
+		paddingHorizontal: '5%',
+		paddingTop: 10,
+	},
 	fab: {
 		position: 'absolute',
-		right: 24,
+		right: '7%',
 		bottom: 32,
 		zIndex: 10,
 		elevation: 10,
+		backgroundColor: '#F7941F',
+		borderRadius: 30,
+		width: 60,
+		height: 60,
+		justifyContent: 'center',
+		alignItems: 'center',
+		shadowColor: '#F7941F',
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.3,
+		shadowRadius: 8,
 	},
 	modal: {
 		justifyContent: 'center',
@@ -105,19 +154,25 @@ const styles = StyleSheet.create({
 	},
 	modalContent: {
 		backgroundColor: '#fff',
-		borderRadius: 12,
-		padding: 20,
-		marginHorizontal: 24,
+		borderRadius: 16,
+		padding: 24,
+		marginHorizontal: '5%',
+		shadowColor: '#c7c7c7ff',
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.15,
+		shadowRadius: 8,
+		elevation: 8,
 	},
 	lastMessageContainer: {
 		alignItems: 'center',
 		marginTop: 8,
-		marginBottom: 80, // leave space for FAB
+		marginBottom: 100, // leave space for FAB
 	},
 	lastMessage: {
-		color: '#888',
+		color: '#666',
 		fontSize: 15,
 		textAlign: 'center',
 		paddingVertical: 8,
+		fontFamily: 'BalsamiqSans_400Regular',
 	},
 });

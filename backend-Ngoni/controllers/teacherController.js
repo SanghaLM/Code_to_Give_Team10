@@ -248,6 +248,7 @@ exports.getSubmissions = async (req, res) => {
   }
 };
 
+<<<<<<< HEAD
 // Teacher: get metrics for a specific homework (wraps parentController logic)
 exports.getHomeworkMetrics = async (req, res) => {
   console.log('teacher getHomeworkMetrics request:', req.params);
@@ -294,6 +295,8 @@ exports.deletePublicPost = async (req, res) => {
   }
 };
 
+=======
+>>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
 exports.provideFeedback = async (req, res) => {
   console.log(
     "provideFeedback request: ",
@@ -489,6 +492,7 @@ exports.getPendingStudents = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+<<<<<<< HEAD
 
 exports.getHomeworkMetrics = async (req, res) => {
   console.log('getHomeworkMetrics (teacher) request:', req.params, 'for user:', req.user.id);
@@ -525,3 +529,5 @@ exports.getHomeworkMetrics = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+=======
+>>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
