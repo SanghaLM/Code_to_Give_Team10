@@ -58,8 +58,8 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   instructionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 15,
   },
   instructionIcon: {
@@ -73,6 +73,38 @@ const styles = StyleSheet.create({
     color: "#000",
     textAlign: "left",
     flex: 1,
+  },
+  stepIndicator: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+    paddingHorizontal: 20,
+  },
+  stepDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#e0e0e0",
+    marginHorizontal: 5,
+  },
+  stepDotActive: {
+    backgroundColor: "#FF9500",
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+  },
+  stepDotCompleted: {
+    backgroundColor: "#4CAF50",
+  },
+  stepLine: {
+    height: 2,
+    flex: 1,
+    backgroundColor: "#e0e0e0",
+    marginHorizontal: 10,
+  },
+  stepLineCompleted: {
+    backgroundColor: "#4CAF50",
   },
   mainContent: {
     flex: 1,
@@ -205,7 +237,7 @@ const styles = StyleSheet.create({
     shadowColor: "#cccccc",
   },
   feedbackContainer: {
-    marginTop: 20,
+    marginTop: 10,
     padding: 15,
     borderRadius: 12,
     minWidth: 200,
@@ -289,10 +321,56 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontFamily: "BalsamiqSans_400Regular",
   },
+  introContainer: {
+    backgroundColor: "#f0f8ff",
+    borderRadius: 15,
+    padding: 25,
+    margin: 20,
+    borderWidth: 2,
+    borderColor: "#007AFF",
+    alignItems: "center",
+  },
+  introTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#007AFF",
+    textAlign: "center",
+    fontFamily: "BalsamiqSans_400Regular",
+    marginBottom: 15,
+  },
+  introText: {
+    fontSize: 16,
+    color: "#333",
+    textAlign: "center",
+    fontFamily: "BalsamiqSans_400Regular",
+    lineHeight: 24,
+    marginBottom: 20,
+  },
+  okButton: {
+    backgroundColor: "#007AFF",
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 25,
+    shadowColor: "#007AFF",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  okButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "600",
+    fontFamily: "BalsamiqSans_400Regular",
+  },
 });
 
 export default function Hw1Screen() {
   const router = useRouter();
+  const [currentStep, setCurrentStep] = useState("intro");
   const [audioPressed, setAudioPressed] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -306,11 +384,9 @@ export default function Hw1Screen() {
   const recordingUri = useRef(null);
   const playbackSound = useRef(null);
 
-  // Word and emoji pairs
   const currentWord = "panda";
   const currentEmoji = "🐼";
 
-  // Initialize audio permissions
   const setupAudio = async () => {
     try {
       await Audio.requestPermissionsAsync();
@@ -327,7 +403,6 @@ export default function Hw1Screen() {
     setupAudio();
   }, []);
 
-  // Cleanup function for sound
   React.useEffect(() => {
     return () => {
       if (playbackSound.current) {
@@ -337,7 +412,6 @@ export default function Hw1Screen() {
   }, []);
 
   const handleNext = () => {
-    // Stop any ongoing speech or playback before navigating
     Speech.stop();
     if (playbackSound.current) {
       playbackSound.current.stopAsync();
@@ -347,28 +421,33 @@ export default function Hw1Screen() {
     }, 1000);
   };
 
+  const handleOkPress = () => {
+    setCurrentStep("demo");
+  };
+
   const handleAudioPress = async () => {
     setAudioPressed(true);
 
     try {
-      // Stop any ongoing speech first
       await Speech.stop();
-
       setIsSpeaking(true);
 
-      // Configure TTS options
       const options = {
         language: "en-US",
         pitch: 1.0,
         rate: 0.8,
-        voice: null, // Use default voice
+        voice: null,
       };
 
-      // Speak the word
       Speech.speak(currentWord, {
         ...options,
         onDone: () => {
           setIsSpeaking(false);
+          if (currentStep === "demo") {
+            setTimeout(() => {
+              setCurrentStep("parent");
+            }, 1000);
+          }
         },
         onStopped: () => {
           setIsSpeaking(false);
@@ -383,7 +462,6 @@ export default function Hw1Screen() {
       setIsSpeaking(false);
     }
 
-    // Reset button state after animation
     setTimeout(() => {
       setAudioPressed(false);
     }, 200);
@@ -391,10 +469,8 @@ export default function Hw1Screen() {
 
   const startRecording = async () => {
     try {
-      // Stop any ongoing speech first
       await Speech.stop();
 
-      console.log("Starting recording...");
       const { status } = await Audio.requestPermissionsAsync();
       if (status !== "granted") {
         Alert.alert(
@@ -404,7 +480,6 @@ export default function Hw1Screen() {
         return;
       }
 
-      // Stop any existing recording
       if (recording.current) {
         await recording.current.stopAndUnloadAsync();
         recording.current = null;
@@ -453,7 +528,6 @@ export default function Hw1Screen() {
   };
 
   const stopRecording = async () => {
-    console.log("Stopping recording...");
     setIsRecording(false);
 
     if (!recording.current) {
@@ -466,10 +540,8 @@ export default function Hw1Screen() {
       recordingUri.current = uri;
       recording.current = null;
       setHasRecording(true);
+      setHasAttempted(true);
 
-      console.log("Recording stopped and stored at", uri);
-
-      // Process the recording for pronunciation assessment
       await processPronunciation(uri);
     } catch (error) {
       console.log("Error stopping recording:", error);
@@ -491,19 +563,14 @@ export default function Hw1Screen() {
     }
 
     try {
-      // Stop any current playback
       if (playbackSound.current) {
         await playbackSound.current.unloadAsync();
         playbackSound.current = null;
       }
 
-      // Stop any ongoing speech
       await Speech.stop();
-
-      console.log("Playing recording from:", recordingUri.current);
       setIsPlayingRecording(true);
 
-      // Load and play the recorded audio
       const { sound } = await Audio.Sound.createAsync(
         { uri: recordingUri.current },
         { shouldPlay: true }
@@ -511,7 +578,6 @@ export default function Hw1Screen() {
 
       playbackSound.current = sound;
 
-      // Set up playback completion callback
       sound.setOnPlaybackStatusUpdate((status) => {
         if (status.didJustFinish) {
           setIsPlayingRecording(false);
@@ -528,38 +594,54 @@ export default function Hw1Screen() {
   };
 
   const processPronunciation = async (audioUri) => {
-    setHasAttempted(true);
+    const isParentStep = currentStep === "parent";
+
     setPronunciationFeedback({
       type: "processing",
-      message: "Let me listen...",
+      message: isParentStep
+        ? "Checking parent pronunciation..."
+        : "Let me listen...",
       character: "🤖",
       score: null,
     });
 
-    try {
-      // Simulate processing time
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // Kid-friendly pronunciation assessment simulation
-      // In real implementation, you'd call Azure API and convert technical scores to kid-friendly feedback
-      const pronunciationOutcomes = [
+    if (isParentStep) {
+      setPronunciationFeedback({
+        type: "success",
+        message: "Perfect! Now help your child say it!",
+        character: "👨‍👩‍👧‍👦",
+        encouragement: "Great modeling!",
+        score: null,
+      });
+
+      setTimeout(() => {
+        setCurrentStep("child");
+        setPronunciationFeedback(null);
+        setHasRecording(false);
+        setHasAttempted(false);
+        recordingUri.current = null;
+      }, 3000);
+    } else {
+      const outcomes = [
         {
           type: "perfect",
-          message: "Perfect! You nailed it!",
+          message: "Perfect! You and your grown-up did great!",
           character: "🌟",
-          encouragement: "Amazing job!",
+          encouragement: "Amazing teamwork!",
         },
         {
           type: "great",
-          message: "Great job! You said it really well!",
+          message: "Great job! Your grown-up helped you well!",
           character: "🎉",
-          encouragement: "Keep it up!",
+          encouragement: "Keep practicing together!",
         },
         {
           type: "good",
           message: "Good try! Almost perfect!",
           character: "👍",
-          encouragement: "You're getting better!",
+          encouragement: "You're learning together!",
         },
         {
           type: "tryAgain",
@@ -575,23 +657,17 @@ export default function Hw1Screen() {
         },
       ];
 
-      // Simulate realistic distribution (mostly positive for encouragement)
-      const weights = [20, 30, 25, 15, 10]; // Perfect, Great, Good, Try Again, Needs Practice
+      const weights = [20, 30, 25, 15, 10];
       const randomValue = Math.random() * 100;
-      let selectedOutcome;
       let cumulativeWeight = 0;
+      let selectedOutcome = outcomes[0];
 
-      for (let i = 0; i < pronunciationOutcomes.length; i++) {
+      for (let i = 0; i < outcomes.length; i++) {
         cumulativeWeight += weights[i];
         if (randomValue <= cumulativeWeight) {
-          selectedOutcome = pronunciationOutcomes[i];
+          selectedOutcome = outcomes[i];
           break;
         }
-      }
-
-      // Fallback to "good" if somehow none selected
-      if (!selectedOutcome) {
-        selectedOutcome = pronunciationOutcomes[2];
       }
 
       setPronunciationFeedback({
@@ -605,16 +681,80 @@ export default function Hw1Screen() {
         encouragement: selectedOutcome.encouragement,
         score: null,
       });
-    } catch (error) {
-      console.log("Error processing pronunciation:", error);
-      setPronunciationFeedback({
-        type: "retry",
-        message: "Oops! Let's try that again!",
-        character: "🤖",
-        encouragement: "No worries!",
-        score: null,
-      });
+
+      if (
+        selectedOutcome.type !== "tryAgain" &&
+        selectedOutcome.type !== "needsPractice"
+      ) {
+        setTimeout(() => {
+          setCurrentStep("complete");
+        }, 3000);
+      }
     }
+  };
+
+  const getStepInfo = () => {
+    switch (currentStep) {
+      case "demo":
+        return {
+          instruction: "Listen, then say the word",
+          showDemo: true,
+          showRecord: false,
+          showPlayback: false,
+        };
+      case "parent":
+        return {
+          instruction: "Parent, record yourself saying the word",
+          showDemo: true,
+          showRecord: true,
+          showPlayback: hasRecording,
+        };
+      case "child":
+        return {
+          instruction: "Child, say the word with your grown-up!",
+          showDemo: true,
+          showRecord: true,
+          showPlayback: hasRecording,
+        };
+      case "complete":
+        return {
+          instruction: "Great job, team! You did it!",
+          showDemo: false,
+          showRecord: false,
+          showPlayback: false,
+        };
+      default:
+        return { instruction: "Listen, then say the word" };
+    }
+  };
+
+  const renderStepIndicator = () => {
+    const steps = ["demo", "parent", "child", "complete"];
+    const currentIndex = steps.indexOf(currentStep);
+
+    return (
+      <View style={styles.stepIndicator}>
+        {steps.map((step, index) => (
+          <React.Fragment key={step}>
+            <View
+              style={[
+                styles.stepDot,
+                index === currentIndex && styles.stepDotActive,
+                index < currentIndex && styles.stepDotCompleted,
+              ]}
+            />
+            {index < steps.length - 1 && (
+              <View
+                style={{
+                  ...styles.stepLine,
+                  ...(index < currentIndex && styles.stepLineCompleted),
+                }}
+              />
+            )}
+          </React.Fragment>
+        ))}
+      </View>
+    );
   };
 
   const renderEmoji = () => {
@@ -663,11 +803,50 @@ export default function Hw1Screen() {
     );
   };
 
-  const canProceed = hasAttempted && pronunciationFeedback?.type === "success";
+  if (currentStep === "intro") {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.topSection}>
+          <View style={styles.headerRow}>
+            <Pressable onPress={() => router.back()}>
+              <Ionicons name="arrow-back" size={24} color="#000" />
+            </Pressable>
+            <View style={styles.progressContainer}>
+              <View style={styles.progressBar}>
+                <View style={styles.progressFill} />
+              </View>
+            </View>
+          </View>
+          <Text style={styles.moduleInfo}>Booklet 2, Module 4 - Fruits</Text>
+        </View>
+
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.introContainer}>
+            <Text style={styles.introTitle}>👨‍👩‍👧‍👦 Parent & Child Activity</Text>
+            <Text style={styles.introText}>
+              This exercise works best when parent and child do it together!
+              {"\n\n"}
+              First, we'll listen to the word together. Then the parent will
+              record themselves saying it clearly, so the child can learn the
+              correct pronunciation.
+              {"\n\n"}
+              Ready to start?
+            </Text>
+            <Pressable style={styles.okButton} onPress={handleOkPress}>
+              <Text style={styles.okButtonText}>Let's Begin!</Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
+  const stepInfo = getStepInfo();
+  const canProceed =
+    currentStep === "complete" && pronunciationFeedback?.type === "success";
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Top Section */}
       <View style={styles.topSection}>
         <View style={styles.headerRow}>
           <Pressable onPress={() => router.back()}>
@@ -682,97 +861,95 @@ export default function Hw1Screen() {
         <Text style={styles.moduleInfo}>Booklet 2, Module 4 - Fruits</Text>
       </View>
 
-      {/* Instruction */}
       <View style={styles.instructionContainer}>
         <View style={styles.instructionRow}>
-          <Image 
-            source={require('../../../assets/instructions/icon-1.jpeg')} 
-            style={styles.instructionIcon} 
+          <Image
+            source={require("../../../assets/instructions/icon-1.jpeg")}
+            style={styles.instructionIcon}
           />
-          <Text style={styles.instruction}>Listen, then say the word</Text>
+          <Text style={styles.instruction}>{stepInfo.instruction}</Text>
         </View>
       </View>
 
-      {/* Main Content */}
-      <ScrollView 
+      <ScrollView
         style={styles.mainContent}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {renderStepIndicator()}
+
         <View style={styles.contentCard}>
-          {/* Emoji */}
           {renderEmoji()}
 
-          {/* Word */}
           <View style={styles.wordContainer}>
             <Text style={styles.word}>{currentWord}</Text>
           </View>
 
-          {/* Button Row */}
-          <View style={styles.buttonRow}>
-            {/* Audio Button - Demo */}
-            <Pressable
-              style={[
-                styles.audioButton,
-                audioPressed && styles.audioButtonPressed,
-                isSpeaking && { backgroundColor: "#ff6b35" },
-              ]}
-              onPress={handleAudioPress}
-              onPressIn={() => setAudioPressed(true)}
-              onPressOut={() => setAudioPressed(false)}
-            >
-              <Ionicons
-                name={isSpeaking ? "volume-high" : "volume-high"}
-                size={36}
-                color="#fff"
-              />
-            </Pressable>
+          {currentStep !== "complete" && (
+            <View style={styles.buttonRow}>
+              <Pressable
+                style={[
+                  styles.audioButton,
+                  audioPressed && styles.audioButtonPressed,
+                  isSpeaking && { backgroundColor: "#ff6b35" },
+                ]}
+                onPress={handleAudioPress}
+                onPressIn={() => setAudioPressed(true)}
+                onPressOut={() => setAudioPressed(false)}
+              >
+                <Ionicons
+                  name={isSpeaking ? "volume-high" : "volume-high"}
+                  size={36}
+                  color="#fff"
+                />
+              </Pressable>
 
-            {/* Record Button */}
-            <Pressable
-              style={[
-                styles.recordButton,
-                isRecording && styles.recordButtonActive,
-                recordPressed && styles.recordButtonPressed,
-              ]}
-              onPress={handleRecordPress}
-              onPressIn={() => setRecordPressed(true)}
-              onPressOut={() => setRecordPressed(false)}
-            >
-              <Ionicons
-                name={isRecording ? "stop-circle" : "mic"}
-                size={36}
-                color="#fff"
-              />
-            </Pressable>
+              {stepInfo.showRecord && (
+                <Pressable
+                  style={[
+                    styles.recordButton,
+                    isRecording && styles.recordButtonActive,
+                    recordPressed && styles.recordButtonPressed,
+                  ]}
+                  onPress={handleRecordPress}
+                  onPressIn={() => setRecordPressed(true)}
+                  onPressOut={() => setRecordPressed(false)}
+                >
+                  <Ionicons
+                    name={isRecording ? "stop-circle" : "mic"}
+                    size={36}
+                    color="#fff"
+                  />
+                </Pressable>
+              )}
 
-            {/* Play Recording Button */}
-            <Pressable
-              style={[
-                styles.playButton,
-                !hasRecording && styles.playButtonDisabled,
-                isPlayingRecording && {
-                  backgroundColor: "#0056b3",
-                  transform: [{ scale: 1.05 }],
-                },
-              ]}
-              onPress={playRecording}
-              disabled={!hasRecording}
-            >
-              <Ionicons
-                name={isPlayingRecording ? "pause" : "play"}
-                size={32}
-                color="#fff"
-              />
-            </Pressable>
-          </View>
+              {stepInfo.showPlayback && (
+                <Pressable
+                  style={[
+                    styles.playButton,
+                    !hasRecording && styles.playButtonDisabled,
+                    isPlayingRecording && {
+                      backgroundColor: "#0056b3",
+                      transform: [{ scale: 1.05 }],
+                    },
+                  ]}
+                  onPress={playRecording}
+                  disabled={!hasRecording}
+                >
+                  <Ionicons
+                    name={isPlayingRecording ? "pause" : "play"}
+                    size={32}
+                    color="#fff"
+                  />
+                </Pressable>
+              )}
+            </View>
+          )}
 
-          {/* Feedback */}
           {renderFeedback()}
         </View>
       </ScrollView>
 
-      {/* Bottom Section */}
       <View style={styles.bottomSection}>
         <Pressable
           style={[styles.nextButton, !canProceed && styles.nextButtonDisabled]}
