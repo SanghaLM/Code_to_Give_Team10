@@ -16,7 +16,7 @@ import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useUser } from "/Users/ngoni/Desktop/MS Code To Give Team 10/frontend/app/userContext.js";
+import { useUser } from "../../userContext.js";
 
 const API_BASE_URL = __DEV__
   ? "http://localhost:3000/api"
