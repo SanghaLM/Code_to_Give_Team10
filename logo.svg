@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100" role="img" aria-label="ReachOut logo - RO ribbon badge">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2C8B57"/>
+      <stop offset="100%" stop-color="#1E6B43"/>
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="88" height="88" rx="22" fill="url(#g)"/>
+  <!-- O -->
+  <circle cx="66" cy="50" r="18" fill="none" stroke="#FFFFFF" stroke-width="7"/>
+  <!-- R -->
+  <path d="M22 28 h16 q12 0 12 12 v0 q0 12 -12 12 h-10 v20 h-6z
+           M38 52 l16 20" fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Ribbon smile -->
+  <path d="M30 70 Q50 82 70 70" fill="none" stroke="#FFC44D" stroke-width="5" stroke-linecap="round"/>
+  <!-- Small leaf dot -->
+  <circle cx="66" cy="30" r="3.5" fill="#FFC44D"/>
+</svg>
