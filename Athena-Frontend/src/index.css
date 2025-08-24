@@ -3,7 +3,6 @@
 @tailwind utilities;
 
 
-/* 全局字體與基礎樣式 */
 :root {
 color-scheme: light;
 }
