@@ -8,6 +8,7 @@ import {
   Animated,
   Alert,
   Image,
+  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -75,9 +76,12 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     flex: 1,
-    justifyContent: "center",
+  },
+  scrollContent: {
+    flexGrow: 1,
     alignItems: "center",
     paddingHorizontal: 20,
+    paddingVertical: 20,
   },
   contentCard: {
     backgroundColor: "#f8f9fa",
@@ -93,6 +97,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
     minWidth: 280,
+    width: "100%",
   },
   emojiContainer: {
     width: 160,
@@ -129,6 +134,7 @@ const styles = StyleSheet.create({
     gap: 15,
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: 20,
   },
   audioButton: {
     width: 70,
@@ -204,6 +210,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     minWidth: 200,
     alignItems: "center",
+    alignSelf: "stretch",
+    marginBottom: 10,
   },
   feedbackSuccess: {
     backgroundColor: "#e8f5e8",
@@ -686,7 +694,11 @@ export default function Hw1Screen() {
       </View>
 
       {/* Main Content */}
-      <View style={styles.mainContent}>
+      <ScrollView 
+        style={styles.mainContent}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.contentCard}>
           {/* Emoji */}
           {renderEmoji()}
@@ -758,7 +770,7 @@ export default function Hw1Screen() {
           {/* Feedback */}
           {renderFeedback()}
         </View>
-      </View>
+      </ScrollView>
 
       {/* Bottom Section */}
       <View style={styles.bottomSection}>
