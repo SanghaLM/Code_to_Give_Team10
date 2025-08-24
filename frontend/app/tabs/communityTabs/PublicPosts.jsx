@@ -131,9 +131,8 @@ const styles = StyleSheet.create({
 	header: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
 	avatar: { width: 40, height: 40, borderRadius: 20, marginRight: 12 },
 	username: { 
-		fontWeight: 'bold', 
+		fontFamily: 'BalsamiqSans_700Bold', 
 		fontSize: 16, 
-		fontFamily: 'BalsamiqSans_400Regular',
 		color: '#000',
 	},
 	timestamp: { 
@@ -151,7 +150,7 @@ const styles = StyleSheet.create({
 	 menuButtonText: {
 		 fontSize: 22,
 		 color: '#666',
-		 fontWeight: 'bold',
+		 fontFamily: 'BalsamiqSans_700Bold',
 	 },
 	 modalOverlay: {
 		 flex: 1,

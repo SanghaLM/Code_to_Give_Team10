@@ -86,12 +86,11 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 		borderColor: '#F7941F',
 	},
-	imagePickerButtonText: {
-		color: '#F7941F',
-		fontWeight: '600',
-		fontSize: 16,
-		fontFamily: 'BalsamiqSans_400Regular',
-	},
+	  imagePickerButtonText: {
+    color: '#F7941F',
+    fontFamily: 'BalsamiqSans_700Bold',
+    fontSize: 16,
+  },
 	imagePreview: {
 		width: '100%',
 		height: 200,

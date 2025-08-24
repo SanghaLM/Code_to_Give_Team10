@@ -425,9 +425,8 @@ const styles = StyleSheet.create({
   },
   leagueName: {
     fontSize: 24,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#000',
-    fontWeight: 'bold',
   },
   leagueDescription: {
     fontSize: 14,
@@ -446,15 +445,13 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 14,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#333',
-    fontWeight: '600',
   },
   nextLeague: {
     fontSize: 12,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#F7941F',
-    fontWeight: 'bold',
   },
   progressBar: {
     height: 8,
@@ -486,9 +483,8 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 20,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#000',
-    fontWeight: 'bold',
     marginTop: 5,
   },
   statLabel: {
@@ -522,9 +518,8 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 16,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#666',
-    fontWeight: '600',
   },
   activeTabText: {
     color: '#fff',
@@ -544,9 +539,8 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#000',
-    fontWeight: 'bold',
     marginBottom: 15,
   },
   leaderboardItem: {
@@ -570,9 +564,8 @@ const styles = StyleSheet.create({
   },
   rankNumber: {
     fontSize: 16,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#333',
-    fontWeight: 'bold',
   },
   currentUserRank: {
     color: '#F7941F',
@@ -590,9 +583,8 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 16,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#000',
-    fontWeight: '600',
   },
   currentUserName: {
     color: '#F7941F',
@@ -612,9 +604,8 @@ const styles = StyleSheet.create({
   },
   points: {
     fontSize: 16,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#000',
-    fontWeight: 'bold',
     marginRight: 4,
   },
   currentUserPoints: {

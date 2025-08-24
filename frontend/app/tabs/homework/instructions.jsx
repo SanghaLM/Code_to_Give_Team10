@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable, SafeAreaView, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, SafeAreaView, ScrollView, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { fontFamily } from '../../fonts';
+
 
 export default function InstructionsScreen() {
   const router = useRouter();
@@ -42,7 +43,7 @@ export default function InstructionsScreen() {
       {/* Main Content */}
       <ScrollView style={styles.mainContent} showsVerticalScrollIndicator={false}>
         <View style={styles.contentContainer}>
-          <Text style={styles.instruction}>Exercise Instructions</Text>
+          <Text style={styles.instruction}>Parental Guidance</Text>
           
           <View style={styles.instructionCard}>
             <View style={styles.instructionHeader}>
@@ -51,55 +52,55 @@ export default function InstructionsScreen() {
             </View>
             
             <Text style={styles.instructionText}>
-              This exercise consists of 4 interactive activities that will help you learn and practice the concepts. Here's what you'll encounter:
+            This exercise contains interactive activities marked by four symbols, each directly related to a different core skill.
             </Text>
           </View>
 
           <View style={styles.stepsContainer}>
             <View style={styles.stepItem}>
-              <View style={styles.stepNumber}>
-                <Text style={styles.stepNumberText}>1</Text>
+              <View style={styles.stepImage}>
+                <Image source={require('../../../assets/instructions/icon-1.jpeg')} style={styles.stepIcon} />
               </View>
               <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Reading & Pronunciation</Text>
+                <Text style={styles.stepTitle}>Point & Read</Text>
                 <Text style={styles.stepDescription}>
-                  Listen to the word and practice saying it out loud. Tap the audio button to hear the correct pronunciation.
+                 Press speaker button and speak out the word written on the screen..
                 </Text>
               </View>
             </View>
 
             <View style={styles.stepItem}>
-              <View style={styles.stepNumber}>
-                <Text style={styles.stepNumberText}>2</Text>
+              <View style={styles.stepImage}>
+                <Image source={require('../../../assets/instructions/icon-2.jpeg')} style={styles.stepIcon} />
               </View>
               <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Matching Exercise</Text>
+                <Text style={styles.stepTitle}>Trace the Letter</Text>
                 <Text style={styles.stepDescription}>
-                  Match the correct word with its corresponding image. Select items from both columns to make the right connection.
+                 Place your finger on the screen and trace the dotted line to form the letter
                 </Text>
               </View>
             </View>
 
             <View style={styles.stepItem}>
-              <View style={styles.stepNumber}>
-                <Text style={styles.stepNumberText}>3</Text>
+              <View style={styles.stepImage}>
+                <Image source={require('../../../assets/instructions/icon-3.jpeg')} style={styles.stepIcon} />
               </View>
               <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Letter Recognition</Text>
+                <Text style={styles.stepTitle}>Independent Task</Text>
                 <Text style={styles.stepDescription}>
-                  Identify the correct letter from the options provided. Look carefully at each choice before making your selection.
+                  Your child is encouraged to write and complete the task independently.
                 </Text>
               </View>
             </View>
 
             <View style={styles.stepItem}>
-              <View style={styles.stepNumber}>
-                <Text style={styles.stepNumberText}>4</Text>
+              <View style={styles.stepImage}>
+                <Image source={require('../../../assets/instructions/icon-4.jpeg')} style={styles.stepIcon} />
               </View>
               <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Tracing Practice</Text>
+                <Text style={styles.stepTitle}>Choose the Correct Answer</Text>
                 <Text style={styles.stepDescription}>
-                  Practice writing by tracing the dotted letters. Follow the pattern carefully to improve your handwriting skills.
+                From the choices provided, identify and tap the correct answer. 
                 </Text>
               </View>
             </View>
@@ -184,11 +185,10 @@ const styles = StyleSheet.create({
   },
   instruction: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontFamily: fontFamily.bold,
     color: '#000',
     marginBottom: 30,
     textAlign: 'left',
-    fontFamily: fontFamily.bold,
   },
   instructionCard: {
     backgroundColor: '#f8f9fa',
@@ -205,10 +205,9 @@ const styles = StyleSheet.create({
   },
   instructionTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: fontFamily.bold,
     color: '#000',
     marginLeft: 10,
-    fontFamily: fontFamily.bold,
   },
   instructionText: {
     fontSize: 16,
@@ -221,34 +220,19 @@ const styles = StyleSheet.create({
   },
   stepItem: {
     flexDirection: 'row',
-    marginBottom: 25,
+    marginBottom: 30,
     alignItems: 'flex-start',
   },
-  stepNumber: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#007AFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
-    marginTop: 2,
-  },
-  stepNumberText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    fontFamily: fontFamily.bold,
-  },
+
   stepContent: {
     flex: 1,
+    paddingTop: 5,
   },
   stepTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: fontFamily.bold,
     color: '#000',
     marginBottom: 8,
-    fontFamily: fontFamily.bold,
   },
   stepDescription: {
     fontSize: 14,
@@ -265,10 +249,9 @@ const styles = StyleSheet.create({
   },
   tipsTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: fontFamily.bold,
     color: '#10b981',
     marginBottom: 15,
-    fontFamily: fontFamily.bold,
   },
   tipItem: {
     flexDirection: 'row',
@@ -298,7 +281,21 @@ const styles = StyleSheet.create({
   startButtonText: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: '600',
     fontFamily: fontFamily.bold,
+  },
+  stepImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 20,
+    marginTop: 0,
+    overflow: 'hidden',
+  },
+  stepIcon: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
 });

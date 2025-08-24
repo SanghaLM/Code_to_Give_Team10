@@ -170,9 +170,8 @@ const styles = StyleSheet.create({
   },
   appName: {
     fontSize: 32,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#000',
-    fontWeight: 'bold',
   },
   tagline: {
     fontSize: 16,
@@ -195,9 +194,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#000',
-    fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -256,9 +254,8 @@ const styles = StyleSheet.create({
   },
   loginButtonText: {
     fontSize: 18,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#fff',
-    fontWeight: 'bold',
     marginRight: 8,
   },
 

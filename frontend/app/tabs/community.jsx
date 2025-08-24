@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   },
   tabLabelActive: {
     color: '#F7941F',
-    fontWeight: '600',
+    fontFamily: 'BalsamiqSans_700Bold',
   },
   tabLabelInactive: {
     color: '#6b7280',

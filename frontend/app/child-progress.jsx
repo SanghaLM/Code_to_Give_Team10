@@ -189,9 +189,8 @@ const styles = StyleSheet.create({
   },
   characterLevel: {
     fontSize: 18,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#F7941F',
-    fontWeight: 'bold',
   },
   pointsContainer: {
     flexDirection: 'row',
@@ -204,9 +203,8 @@ const styles = StyleSheet.create({
   },
   pointsText: {
     fontSize: 16,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#9957B3',
-    fontWeight: 'bold',
     marginLeft: 5,
   },
 
@@ -230,9 +228,8 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#000',
-    fontWeight: 'bold',
   },
   historyButton: {
     flexDirection: 'row',
@@ -246,9 +243,8 @@ const styles = StyleSheet.create({
   },
   historyButtonText: {
     fontSize: 14,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#F7941F',
-    fontWeight: '600',
     marginLeft: 5,
   },
   chartContainer: {

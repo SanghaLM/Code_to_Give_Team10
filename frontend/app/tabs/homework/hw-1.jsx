@@ -57,10 +57,9 @@ const styles = StyleSheet.create({
   },
   instruction: {
     fontSize: 28,
-    fontWeight: "bold",
+    fontFamily: "BalsamiqSans_700Bold",
     color: "#000",
     textAlign: "center",
-    fontFamily: "BalsamiqSans_400Regular",
   },
   mainContent: {
     flex: 1,
@@ -109,10 +108,9 @@ const styles = StyleSheet.create({
   },
   word: {
     fontSize: 42,
-    fontWeight: "bold",
+    fontFamily: "BalsamiqSans_700Bold",
     color: "#007AFF",
     textAlign: "center",
-    fontFamily: "BalsamiqSans_400Regular",
   },
   buttonRow: {
     flexDirection: "row",

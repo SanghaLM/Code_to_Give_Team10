@@ -102,9 +102,8 @@ const styles = StyleSheet.create({
   },
   title: { 
     fontSize: 28, 
-    fontWeight: 'bold', 
+    fontFamily: 'BalsamiqSans_700Bold', 
     marginBottom: 16,
-    fontFamily: 'BalsamiqSans_400Regular',
     color: '#000',
   },
   createButton: {
@@ -123,8 +122,7 @@ const styles = StyleSheet.create({
   createButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontFamily: 'BalsamiqSans_400Regular',
-    fontWeight: 'bold',
+    fontFamily: 'BalsamiqSans_700Bold',
   },
   assignmentCard: {
     backgroundColor: '#fff',
@@ -139,9 +137,8 @@ const styles = StyleSheet.create({
   },
   assignmentTitle: { 
     fontSize: 18, 
-    fontWeight: 'bold', 
+    fontFamily: 'BalsamiqSans_700Bold', 
     marginBottom: 8,
-    fontFamily: 'BalsamiqSans_400Regular',
     color: '#000',
   },
   statsRow: { 

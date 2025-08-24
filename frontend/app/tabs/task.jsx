@@ -81,19 +81,17 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   bookletNumberText: {
-    fontWeight: 'bold',
+    fontFamily: 'BalsamiqSans_700Bold',
     fontSize: 16,
-    fontFamily: 'BalsamiqSans_400Regular',
   },
   bookletInfo: {
     flex: 1,
   },
   bookletTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#000',
     marginBottom: 0,
-    fontFamily: 'BalsamiqSans_400Regular',
   },
   bookletStatus: {
     fontSize: 14,
@@ -204,9 +202,8 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: '600',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#000',
-    fontFamily: 'BalsamiqSans_400Regular',
   },
   closeButton: {
     padding: 4,
@@ -220,7 +217,7 @@ const styles = StyleSheet.create({
   },
   moduleHighlight: {
     color: '#F7941F',
-    fontWeight: '600',
+    fontFamily: 'BalsamiqSans_700Bold',
   },
   optionContainer: {
     gap: 12,
@@ -228,12 +225,17 @@ const styles = StyleSheet.create({
   optionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
     paddingLeft: 17,
     paddingRight: 15,
     paddingTop: 12,
     paddingBottom: 12,
     borderRadius: 12,
+  },
+  inGameButton: {
+    backgroundColor: '#007AFF',
+  },
+  manualButton: {
+    backgroundColor: '#10b981',
   },
   optionIcon: {
     marginRight: 16,
@@ -242,15 +244,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   optionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#000',
+    fontSize: 17,
+    fontFamily: 'BalsamiqSans_700Bold',
+    color: '#fff',
     marginBottom: 2,
-    fontFamily: 'BalsamiqSans_400Regular',
   },
   optionSubtitle: {
     fontSize: 14,
-    color: '#666',
+    color: '#fff',
     fontFamily: 'BalsamiqSans_400Regular',
   },
 });
@@ -473,37 +474,37 @@ export default function TaskScreen() {
             </Text>
             
             <View style={styles.optionContainer}>
-              <Pressable 
-                style={styles.optionButton}
-                onPress={handleInGameExercise}
-              >
-                <View style={styles.optionIcon}>
-                  <Ionicons name="game-controller" size={32} color="#007AFF" />
-                </View>
-                <View style={styles.optionContent}>
-                  <Text style={styles.optionTitle}>In-Game Exercise</Text>
-                  <Text style={styles.optionSubtitle}>
-                    Complete interactive exercises with guided instructions
-                  </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color="#666" />
-              </Pressable>
+                             <Pressable 
+                 style={[styles.optionButton, styles.inGameButton]}
+                 onPress={handleInGameExercise}
+               >
+                 <View style={styles.optionIcon}>
+                   <Ionicons name="game-controller" size={32} color="#fff" />
+                 </View>
+                 <View style={styles.optionContent}>
+                   <Text style={styles.optionTitle}>In-Game Exercise</Text>
+                   <Text style={styles.optionSubtitle}>
+                     Complete interactive exercises with guided instructions
+                   </Text>
+                 </View>
+                 <Ionicons name="chevron-forward" size={20} color="#fff" />
+               </Pressable>
               
-              <Pressable 
-                style={styles.optionButton}
-                onPress={handleManualSubmission}
-              >
-                <View style={styles.optionIcon}>
-                  <Ionicons name="document-text" size={32} color="#10b981" />
-                </View>
-                <View style={styles.optionContent}>
-                  <Text style={styles.optionTitle}>Submit Manually</Text>
-                  <Text style={styles.optionSubtitle}>
-                    Upload your completed work or write your answers
-                  </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color="#666" />
-              </Pressable>
+                             <Pressable 
+                 style={[styles.optionButton, styles.manualButton]}
+                 onPress={handleManualSubmission}
+               >
+                 <View style={styles.optionIcon}>
+                   <Ionicons name="document-text" size={32} color="#fff" />
+                 </View>
+                 <View style={styles.optionContent}>
+                   <Text style={styles.optionTitle}>Submit Manually</Text>
+                   <Text style={styles.optionSubtitle}>
+                     Upload your completed work or write your answers
+                   </Text>
+                 </View>
+                 <Ionicons name="chevron-forward" size={20} color="#fff" />
+               </Pressable>
             </View>
           </View>
         </View>
