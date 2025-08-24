@@ -64,7 +64,7 @@ export default function InstructionsScreen() {
               <View style={styles.stepContent}>
                 <Text style={styles.stepTitle}>Point & Read</Text>
                 <Text style={styles.stepDescription}>
-                 Press speaker button and speak out the word written on the screen..
+                 Press speaker button and speak out the word written on the screen.
                 </Text>
               </View>
             </View>
@@ -76,7 +76,7 @@ export default function InstructionsScreen() {
               <View style={styles.stepContent}>
                 <Text style={styles.stepTitle}>Trace the Letter</Text>
                 <Text style={styles.stepDescription}>
-                 Place your finger on the screen and trace the dotted line to form the letter
+                 Place your finger on the screen and trace the dotted line to form the letter.
                 </Text>
               </View>
             </View>
@@ -106,6 +106,17 @@ export default function InstructionsScreen() {
             </View>
           </View>
 
+          {/* Start Exercise Button */}
+          <View style={styles.buttonContainer}>
+            <Pressable 
+              style={styles.startButton}
+              onPress={handleStartExercise}
+            >
+              <Text style={styles.startButtonText}>Start Exercise</Text>
+              <Ionicons name="play" size={20} color="#fff" />
+            </Pressable>
+          </View>
+
           <View style={styles.tipsContainer}>
             <Text style={styles.tipsTitle}>💡 Tips for Success</Text>
             <View style={styles.tipItem}>
@@ -123,17 +134,6 @@ export default function InstructionsScreen() {
           </View>
         </View>
       </ScrollView>
-
-      {/* Bottom Section */}
-      <View style={styles.bottomSection}>
-        <Pressable 
-          style={styles.startButton}
-          onPress={handleStartExercise}
-        >
-          <Text style={styles.startButtonText}>Start Exercise</Text>
-          <Ionicons name="play" size={20} color="#fff" />
-        </Pressable>
-      </View>
     </SafeAreaView>
   );
 }
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.regular,
   },
   stepsContainer: {
-    marginBottom: 30,
+    marginBottom: 3,
   },
   stepItem: {
     flexDirection: 'row',
@@ -264,14 +264,13 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontFamily: fontFamily.regular,
   },
-  bottomSection: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
+  buttonContainer: {
     alignItems: 'center',
+    marginBottom: 30,
   },
   startButton: {
     backgroundColor: '#007AFF',
-    paddingVertical: 15,
+    paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 12,
     flexDirection: 'row',
