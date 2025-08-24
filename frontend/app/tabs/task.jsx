@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
@@ -176,12 +176,90 @@ const styles = StyleSheet.create({
     color: '#9957B3',
     fontFamily: 'BalsamiqSans_400Regular',
   },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  modalContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxWidth: 400,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#000',
+    fontFamily: 'BalsamiqSans_400Regular',
+  },
+  closeButton: {
+    padding: 4,
+  },
+  modalDescription: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'left',
+    marginBottom: 13,
+    fontFamily: 'BalsamiqSans_400Regular',
+  },
+  moduleHighlight: {
+    color: '#F7941F',
+    fontWeight: '600',
+  },
+  optionContainer: {
+    gap: 12,
+  },
+  optionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    paddingLeft: 17,
+    paddingRight: 15,
+    paddingTop: 12,
+    paddingBottom: 12,
+    borderRadius: 12,
+  },
+  optionIcon: {
+    marginRight: 16,
+  },
+  optionContent: {
+    flex: 1,
+  },
+  optionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: 2,
+    fontFamily: 'BalsamiqSans_400Regular',
+  },
+  optionSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    fontFamily: 'BalsamiqSans_400Regular',
+  },
 });
 
 export default function TaskScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('All');
   const [expandedBooklets, setExpandedBooklets] = useState([1]); // Booklet 2 is expanded by default
+  const [showSubmissionModal, setShowSubmissionModal] = useState(false);
 
   const toggleBooklet = (bookletId) => {
     setExpandedBooklets(prev => 
@@ -189,6 +267,20 @@ export default function TaskScreen() {
         ? prev.filter(id => id !== bookletId)
         : [...prev, bookletId]
     );
+  };
+
+  const handleSubmitPress = () => {
+    setShowSubmissionModal(true);
+  };
+
+  const handleInGameExercise = () => {
+    setShowSubmissionModal(false);
+    router.push('/tabs/homework/instructions');
+  };
+
+  const handleManualSubmission = () => {
+    setShowSubmissionModal(false);
+    router.push('/tabs/homework/manual');
   };
 
   const booklets = [
@@ -332,7 +424,7 @@ export default function TaskScreen() {
                       {!module.completed && (
                         <Pressable
                           style={styles.submitButton}
-                          onPress={() => router.push('/tabs/homework/hw-1')}
+                          onPress={handleSubmitPress}
                         >
                           <Text style={styles.submitButtonText}>Submit</Text>
                         </Pressable>
@@ -355,6 +447,67 @@ export default function TaskScreen() {
           </View>
         );
       })}
+      
+      {/* Homework Submission Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showSubmissionModal}
+        onRequestClose={() => setShowSubmissionModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Choose Submission Method</Text>
+              <Pressable 
+                style={styles.closeButton}
+                onPress={() => setShowSubmissionModal(false)}
+              >
+                <Ionicons name="close" size={24} color="#666" />
+              </Pressable>
+            </View>
+            
+            <Text style={styles.modalDescription}>
+              How would you like to complete {' '} 
+              <Text style={styles.moduleHighlight}>Booklet 2, Module 4 - Fruits</Text> exercise?
+            </Text>
+            
+            <View style={styles.optionContainer}>
+              <Pressable 
+                style={styles.optionButton}
+                onPress={handleInGameExercise}
+              >
+                <View style={styles.optionIcon}>
+                  <Ionicons name="game-controller" size={32} color="#007AFF" />
+                </View>
+                <View style={styles.optionContent}>
+                  <Text style={styles.optionTitle}>In-Game Exercise</Text>
+                  <Text style={styles.optionSubtitle}>
+                    Complete interactive exercises with guided instructions
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#666" />
+              </Pressable>
+              
+              <Pressable 
+                style={styles.optionButton}
+                onPress={handleManualSubmission}
+              >
+                <View style={styles.optionIcon}>
+                  <Ionicons name="document-text" size={32} color="#10b981" />
+                </View>
+                <View style={styles.optionContent}>
+                  <Text style={styles.optionTitle}>Submit Manually</Text>
+                  <Text style={styles.optionSubtitle}>
+                    Upload your completed work or write your answers
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#666" />
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }

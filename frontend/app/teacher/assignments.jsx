@@ -53,10 +53,17 @@ function getStats(assignment) {
 
 export default function TeacherAssignments() {
   const router = useRouter();
+  
+  const handleCreateAssignment = () => {
+    router.push('/teacher/create-assignment');
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Assignments</Text>
-      <Button title="Create New Assignment" onPress={() => {}} />
+      <Pressable style={styles.createButton} onPress={handleCreateAssignment}>
+        <Text style={styles.createButtonText}>Create New Assignment</Text>
+      </Pressable>
       <FlatList
         data={ASSIGNMENTS}
         keyExtractor={item => item.id}
@@ -87,19 +94,64 @@ export default function TeacherAssignments() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24, backgroundColor: '#fff' },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 16 },
-  assignmentCard: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 4,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 2,
-    elevation: 1,
+  container: { 
+    flex: 1, 
+    padding: 24, 
+    backgroundColor: '#FFF4E7',
+    paddingTop: '12%',
   },
-  assignmentTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
-  statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-  stat: { fontSize: 15, color: '#333' },
+  title: { 
+    fontSize: 28, 
+    fontWeight: 'bold', 
+    marginBottom: 16,
+    fontFamily: 'BalsamiqSans_400Regular',
+    color: '#000',
+  },
+  createButton: {
+    backgroundColor: '#F7941F',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 20,
+    shadowColor: '#F7941F',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  createButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'BalsamiqSans_400Regular',
+    fontWeight: 'bold',
+  },
+  assignmentCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#c7c7c7ff',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  assignmentTitle: { 
+    fontSize: 18, 
+    fontWeight: 'bold', 
+    marginBottom: 8,
+    fontFamily: 'BalsamiqSans_400Regular',
+    color: '#000',
+  },
+  statsRow: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    marginBottom: 4,
+  },
+  stat: { 
+    fontSize: 15, 
+    color: '#333',
+    fontFamily: 'BalsamiqSans_400Regular',
+  },
 });
