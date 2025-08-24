@@ -5,11 +5,7 @@ const HomeworkSubmissionSchema = new Schema(
   {
     homeworkId: {
       type: mongoose.Schema.Types.ObjectId,
-<<<<<<< HEAD
-      ref: "HomeworkAssignment",
-=======
       ref: "Homework",
->>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
       required: true,
     },
     studentId: {

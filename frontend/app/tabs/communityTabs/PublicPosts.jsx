@@ -22,7 +22,8 @@ function Post({ post, onReact, onAddComment, onReport }) {
 	const handleReport = async () => {
 		setMenuVisible(false);
 		try {
-			if (onReport) await onReport(post.id);
+			const idStr = String(post.id || post._id);
+			if (onReport) await onReport(idStr);
 			setTimeout(() => {
 				if (Platform.OS === 'android') {
 					ToastAndroid.show('Report forwarded to staff for review.', ToastAndroid.SHORT);

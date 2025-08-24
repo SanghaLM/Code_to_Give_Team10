@@ -9,6 +9,9 @@ const CommentSchema = new Schema({
 
 const PostSchema = new Schema({
   author: { type: String, required: true },
+  // Persisted display name and avatar for the author (optional)
+  username: { type: String },
+  avatar: { type: String, default: null },
   text: { type: String, required: true },
   image: { type: String, default: null },
   category: { type: String, enum: ['forfun', 'homework'], default: 'forfun' },

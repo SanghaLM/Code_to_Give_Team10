@@ -43,19 +43,6 @@ router.get(
   authMiddleware,
   teacherController.getSubmissions
 );
-<<<<<<< HEAD
-router.get(
-  "/homework/:homeworkId/metrics",
-  authMiddleware,
-  teacherController.getHomeworkMetrics
-);
-router.get(
-  "/homework/:homeworkId/metrics",
-  authMiddleware,
-  teacherController.getHomeworkMetrics
-);
-=======
->>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
 router.post(
   "/submission/:id/feedback",
   authMiddleware,
@@ -75,10 +62,5 @@ router.get(
   teacherController.getStudentProgress
 );
 router.post("/students", authMiddleware, teacherController.addStudent); // Added
-<<<<<<< HEAD
-// Moderation
-router.delete('/posts/:postId', authMiddleware, teacherController.deletePublicPost);
-=======
->>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
 
 module.exports = router;

@@ -79,11 +79,14 @@ export default function ForFun() {
 	};
 
 	const handleReact = async (postId) => {
-		if (reactedPostIds.includes(postId)) return;
+		// normalize id to string to avoid mismatches between `id` and `_id`
+		const idStr = String(postId);
+		if (reactedPostIds.includes(idStr)) return;
 		try {
 			const res = await api.request(`/public/posts/${postId}/react`, { method: 'POST' });
-			setPosts(prev => prev.map(p => p.id === res.post.id ? res.post : p));
-			setReactedPostIds(prev => [...prev, postId]);
+			const updatedPost = (res && res.post) ? res.post : res;
+			setPosts(prev => prev.map(p => (String(p.id || p._id) === String(updatedPost.id || updatedPost._id) ? updatedPost : p)));
+			setReactedPostIds(prev => [...prev, idStr]);
 		} catch (err) {
 			console.warn('React failed', err);
 		}
@@ -92,7 +95,8 @@ export default function ForFun() {
 	const handleAddComment = async (postId, commentText) => {
 		try {
 			const res = await api.request(`/public/posts/${postId}/comment`, { method: 'POST', body: JSON.stringify({ username: username || 'You', text: commentText }) });
-			setPosts(prev => prev.map(p => p.id === res.post.id ? res.post : p));
+			const updatedPost = (res && res.post) ? res.post : res;
+			setPosts(prev => prev.map(p => (String(p.id || p._id) === String(updatedPost.id || updatedPost._id) ? updatedPost : p)));
 		} catch (err) {
 			console.warn('Add comment failed', err);
 		}

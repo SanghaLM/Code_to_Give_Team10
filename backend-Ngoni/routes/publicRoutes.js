@@ -11,4 +11,7 @@ router.post('/posts/:postId/report', publicController.reportPost);
 router.delete('/posts/:postId', publicController.deletePost);
 router.patch('/posts/:postId/unreport', publicController.unreportPost);
 
+// LLM reply endpoint used by chat UI
+router.post('/llm/reply', publicController.llmReply);
+
 module.exports = router;
