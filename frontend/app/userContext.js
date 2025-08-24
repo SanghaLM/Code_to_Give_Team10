@@ -79,3 +79,6 @@ export function UserProvider({ children }) {
 export function useUser() {
   return useContext(UserContext);
 }
+
+// Default export for router compatibility (not used as a screen). Export the provider.
+export default UserProvider;

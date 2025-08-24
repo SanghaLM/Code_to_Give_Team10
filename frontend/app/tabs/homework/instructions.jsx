@@ -1,9 +1,5 @@
 import React from 'react';
-<<<<<<< HEAD
-import { View, Text, StyleSheet, Pressable, SafeAreaView, ScrollView, Alert } from 'react-native';
-=======
 import { View, Text, StyleSheet, Pressable, SafeAreaView, ScrollView, Image } from 'react-native';
->>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { fontFamily } from '../../fonts';
@@ -156,29 +152,6 @@ export default function InstructionsScreen() {
           </View>
         </View>
       </ScrollView>
-<<<<<<< HEAD
-
-      {/* Bottom Section */}
-      <View style={styles.bottomSection}>
-        <View style={{ flexDirection: 'row', gap: 12 }}>
-          <Pressable 
-            style={styles.startButton}
-            onPress={handleStartExercise}
-          >
-            <Text style={styles.startButtonText}>Start Exercise</Text>
-            <Ionicons name="play" size={20} color="#fff" />
-          </Pressable>
-          <Pressable
-            style={[styles.startButton, { backgroundColor: '#ef4444' }]}
-            onPress={handleResetHomework}
-          >
-            <Text style={styles.startButtonText}>Reset Homework</Text>
-            <Ionicons name="refresh" size={20} color="#fff" />
-          </Pressable>
-        </View>
-      </View>
-=======
->>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
     </SafeAreaView>
   );
 }

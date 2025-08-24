@@ -6,11 +6,8 @@ import { Ionicons } from '@expo/vector-icons';
 import NewPublicPost from './NewPublicPost';
 import PublicPosts from './PublicPosts';
 import Modal from 'react-native-modal';
-<<<<<<< HEAD
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as api from '../../api';
 import { useUser } from '../../userContext';
-=======
 
 const initialPosts = [
 	{
@@ -36,10 +33,10 @@ const initialPosts = [
 		timestamp: '1h ago',
 	},
 ];
->>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
 
 export default function HomeworkHelp() {
-	const [posts, setPosts] = useState([]);
+	// fallback demo posts so the feed is visible without a backend
+	const [posts, setPosts] = useState(initialPosts);
 	const [modalVisible, setModalVisible] = useState(false);
 	const [reactedPostIds, setReactedPostIds] = useState([]);
 	const { username, token } = useUser();
@@ -47,7 +44,9 @@ export default function HomeworkHelp() {
 	const load = async () => {
 		try {
 			const res = await api.listPublicPostsByCategory('homework');
-			setPosts(res.posts || []);
+			if (res && Array.isArray(res.posts) && res.posts.length > 0) {
+				setPosts(res.posts);
+			}
 		} catch (err) {
 			console.warn('Failed to load public posts', err);
 		}
@@ -57,8 +56,20 @@ export default function HomeworkHelp() {
 
 	const handleAddPost = async (text, image) => {
 		try {
-			const res = await api.createPublicPost(username || 'You', text, image, token, 'homework');
-			setPosts(prev => [res.post, ...prev]);
+				const sendUsername = (username || '').toLowerCase() === 'sarahchen' ? 'Sarah Chen' : (username || 'You');
+				const sendAvatar = (username || '').toLowerCase() === 'sarahchen' ? 'https://randomuser.me/api/portraits/women/65.jpg' : undefined;
+				const res = await api.createPublicPost(username || 'sarahchen', text, image, token, 'homework', sendUsername, sendAvatar);
+				let newPost = res.post || {};
+				if ((username || '').toLowerCase() === 'sarahchen') {
+					newPost = {
+						...newPost,
+						username: 'Sarah Chen',
+						avatar: 'https://randomuser.me/api/portraits/women/65.jpg',
+					};
+				} else {
+					newPost = { ...newPost, username: newPost.author || username || 'You' };
+				}
+				setPosts(prev => [newPost, ...prev]);
 			setModalVisible(false);
 		} catch (err) {
 			console.error('Failed to create post', err);
@@ -103,13 +114,8 @@ export default function HomeworkHelp() {
 				onPress={() => setModalVisible(true)}
 				activeOpacity={0.8}
 			>
-<<<<<<< HEAD
-				<Icon name="plus-circle" size={60} color="#1976d2" />
-			</TouchableOpacity>
-=======
 				<Ionicons name="add" size={28} color="#fff" />
 			</TouchableOpacity> 
->>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
 			<Modal
 				isVisible={modalVisible}
 				onBackdropPress={() => setModalVisible(false)}

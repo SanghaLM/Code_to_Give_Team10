@@ -14,6 +14,7 @@ import {
   FlatList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import * as api from '../../api';
 
 const MessageTeacherRoute = () => {
   const [currentScreen, setCurrentScreen] = useState("teacherList");
@@ -21,9 +22,11 @@ const MessageTeacherRoute = () => {
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [currentBot, setCurrentBot] = useState(null);
-  const [conversationStage, setConversationStage] = useState(0);
   const [feedbackCollected, setFeedbackCollected] = useState([]);
+  // UI state for optional quick reply buttons (may be toggled after replies)
   const [showQuickResponses, setShowQuickResponses] = useState(false);
+  // Simple conversation stage counter for lightweight heuristics/fallbacks
+  const [conversationStage, setConversationStage] = useState(0);
   const scrollViewRef = useRef(null);
   const typingAnimation = useRef(new Animated.Value(0)).current;
 
@@ -41,74 +44,6 @@ const MessageTeacherRoute = () => {
       lastSeen: "2 min ago",
       welcomeMessage:
         "Hello! 👋 I'm Ms. Luna, and I love helping little ones discover letters and sounds! Tell me, did your child practice any letters or phonics today?",
-      conversationFlow: [
-        {
-          stage: 0,
-          question: "Which letters or sounds did you focus on today?",
-          quickResponses: [
-            "ABC letters",
-            "Letter sounds",
-            "Writing practice",
-            "We didn't practice",
-          ],
-        },
-        {
-          stage: 1,
-          question:
-            "How confident did your child seem? Did they recognize the letters easily?",
-          quickResponses: [
-            "Very confident! 😊",
-            "Getting there 😐",
-            "Still learning 😅",
-            "Struggled a bit 😢",
-          ],
-        },
-        {
-          stage: 2,
-          question:
-            "That's valuable feedback! How long did you practice together?",
-          quickResponses: [
-            "5-10 minutes",
-            "15-20 minutes",
-            "30+ minutes",
-            "Just a few minutes",
-          ],
-        },
-        {
-          stage: 3,
-          question:
-            "Perfect! Any particular letters they found tricky or exciting?",
-          quickResponses: [
-            "B and D confusion",
-            "Loved writing",
-            "Hard to sit still",
-            "Ask me more",
-          ],
-        },
-      ],
-      tips: [
-        "🎯 Try the 'letter hunt' - find that letter on cereal boxes, signs, anywhere!",
-        "✏️ Trace letters in sand, salt, or finger paint - make it sensory!",
-        "🎵 Letter songs help kids remember - sing the ABC song slowly!",
-        "🏆 Celebrate small wins - recognizing just one letter is huge progress!",
-      ],
-      responses: {
-        positive: [
-          "That's absolutely wonderful! 🌟 Your child is making great progress!",
-          "I love hearing success stories like this! ✨ Keep up the amazing work!",
-          "Fantastic! 🎉 You're doing such a great job supporting their learning!",
-        ],
-        neutral: [
-          "Thank you for being so honest! 💝 Every bit of practice helps.",
-          "That's completely normal for kindergarten! 🌱 They're learning so much.",
-          "Perfect feedback! 📝 This helps me understand where they are.",
-        ],
-        concern: [
-          "No worries at all! 🤗 Every child learns at their own pace.",
-          "That's totally okay! 💪 Some days are harder than others.",
-          "Thank you for sharing that - it helps me support them better! 🌈",
-        ],
-      },
     },
     {
       id: "ms_rose",
@@ -122,75 +57,6 @@ const MessageTeacherRoute = () => {
       lastSeen: "5 min ago",
       welcomeMessage:
         "Hi there! 🌹 I'm Ms. Rose, and I'm passionate about helping children fall in love with stories and reading! How was reading time today?",
-      conversationFlow: [
-        {
-          stage: 0,
-          question:
-            "What did you read together today? A book, or maybe you told a story?",
-          quickResponses: [
-            "Picture book",
-            "Made up story",
-            "Online story",
-            "No reading today",
-          ],
-        },
-        {
-          stage: 1,
-          question:
-            "Wonderful! How engaged was your little one? Were they asking questions or making comments?",
-          quickResponses: [
-            "Very engaged! 😍",
-            "Listened well 😊",
-            "A bit distracted 😐",
-            "Hard to focus 😴",
-          ],
-        },
-        {
-          stage: 2,
-          question:
-            "That's really helpful to know! Did they try to 'read' any words or predict what comes next?",
-          quickResponses: [
-            "Yes, tried reading!",
-            "Guessed the story",
-            "Just listened",
-            "Wanted to turn pages",
-          ],
-        },
-        {
-          stage: 3,
-          question:
-            "Beautiful! Any favorite characters or parts they got excited about?",
-          quickResponses: [
-            "Loved the animals",
-            "Funny parts",
-            "Asked to read again",
-            "Tell me more",
-          ],
-        },
-      ],
-      tips: [
-        "📖 Let them 'read' the pictures - describing what they see builds comprehension!",
-        "🗣️ Ask 'What do you think happens next?' - prediction builds thinking skills!",
-        "🎭 Act out the story together - movement helps memory and engagement!",
-        "💤 Bedtime stories create positive associations with reading!",
-      ],
-      responses: {
-        positive: [
-          "Oh how wonderful! 📚 Building that love of stories is so important!",
-          "That makes my heart happy! 💕 Keep nurturing that reading joy!",
-          "Excellent! 🎉 You're creating a lifelong love of books!",
-        ],
-        neutral: [
-          "Thank you for sharing! 📝 Every reading moment counts, big or small.",
-          "That's perfectly normal! 🌸 Building reading habits takes time.",
-          "I appreciate the honest feedback! 💖 This helps me understand their journey.",
-        ],
-        concern: [
-          "That's completely okay! 🤗 Some days reading is harder than others.",
-          "No pressure! 🌱 Even looking at books together is valuable.",
-          "Thank you for trying! 💪 Tomorrow is a new opportunity to explore stories.",
-        ],
-      },
     },
   ];
 
@@ -216,12 +82,10 @@ const MessageTeacherRoute = () => {
   }, [isTyping, typingAnimation]);
 
   const startChatWithBot = (bot) => {
-    setCurrentBot(bot);
-    setCurrentScreen("chat");
-    setMessages([]);
-    setConversationStage(0);
-    setFeedbackCollected([]);
-    setShowQuickResponses(false);
+  setCurrentBot(bot);
+  setCurrentScreen("chat");
+  setMessages([]);
+  setFeedbackCollected([]);
 
     // Mark as read
     const updatedBots = teachingBots.map((b) =>
@@ -268,123 +132,58 @@ const MessageTeacherRoute = () => {
     }, 100);
   };
 
-  const handleQuickResponse = (response) => {
-    addUserMessage(response, true);
-    setInputText("");
-    setShowQuickResponses(false);
-    generateBotResponse(response);
-  };
+  // quick responses removed; LLM will handle follow-up replies
 
-  const generateBotResponse = (userMessage) => {
+  const generateBotResponse = async (userMessage) => {
     if (!currentBot) return;
 
     setIsTyping(true);
     setShowQuickResponses(false);
 
+    try {
+      const res = await api.llmReply(userMessage, currentBot.id);
+      const reply = (res && res.reply) ? res.reply : null;
+      setIsTyping(false);
+      if (reply) {
+        addBotMessage(reply, currentBot);
+        // show quick responses after LLM reply
+        setTimeout(() => setShowQuickResponses(true), 800);
+        setConversationStage((prev) => prev + 1);
+        return;
+      }
+    } catch (err) {
+      console.warn('LLM reply failed, falling back to local heuristic', err);
+    }
+
+    // Fallback to a safe local response if LLM fails or returns nothing
     setTimeout(() => {
       setIsTyping(false);
-
       try {
-        const responses = getBotResponse(
-          userMessage.toLowerCase(),
-          conversationStage
-        );
-
+        // If a local heuristic is available use it, otherwise use a simple default reply.
+        const responses = (typeof getBotResponse === 'function')
+          ? getBotResponse(userMessage.toLowerCase(), conversationStage)
+          : ["I'm sorry, I didn't quite catch that. Could you tell me more?"];
         responses.forEach((response, index) => {
           addBotMessage(response, currentBot, index * 1200);
         });
-
-        // Show quick responses after bot responds (except for final stage)
         if (conversationStage < 3) {
-          setTimeout(() => {
-            setShowQuickResponses(true);
-          }, responses.length * 1200 + 500);
+          setTimeout(() => setShowQuickResponses(true), responses.length * 1200 + 500);
         }
-
         setConversationStage((prev) => prev + 1);
       } catch (error) {
-        console.error("Error generating response:", error);
-        addBotMessage(
-          "I'm sorry, I didn't quite catch that. Could you tell me more?",
-          currentBot
-        );
-        setShowQuickResponses(true);
+        console.error('Error generating fallback response:', error);
+        addBotMessage("I'm sorry, I didn't quite catch that. Could you tell me more?", currentBot);
       }
-    }, 1500);
+    }, 800);
   };
 
-  const getBotResponse = (userInput, stage) => {
-    if (
-      !currentBot.conversationFlow ||
-      stage >= currentBot.conversationFlow.length
-    ) {
-      return handleConversationEnd();
-    }
-
-    // Determine sentiment
-    const isPositive =
-      userInput.includes("confident") ||
-      userInput.includes("great") ||
-      userInput.includes("loved") ||
-      userInput.includes("yes") ||
-      userInput.includes("good") ||
-      userInput.includes("engaged") ||
-      userInput.includes("😊") ||
-      userInput.includes("very");
-
-    const isConcern =
-      userInput.includes("struggle") ||
-      userInput.includes("hard") ||
-      userInput.includes("difficult") ||
-      userInput.includes("no") ||
-      userInput.includes("😢") ||
-      userInput.includes("😐") ||
-      userInput.includes("didn't") ||
-      userInput.includes("distracted");
-
-    let responses = [];
-
-    // Contextual acknowledgment
-    if (isPositive) {
-      const positiveResponses = currentBot.responses.positive;
-      responses.push(
-        positiveResponses[Math.floor(Math.random() * positiveResponses.length)]
-      );
-    } else if (isConcern) {
-      const concernResponses = currentBot.responses.concern;
-      responses.push(
-        concernResponses[Math.floor(Math.random() * concernResponses.length)]
-      );
-
-      // Add helpful tip for concerns
-      const randomTip =
-        currentBot.tips[Math.floor(Math.random() * currentBot.tips.length)];
-      responses.push(`💡 Quick tip: ${randomTip}`);
-    } else {
-      const neutralResponses = currentBot.responses.neutral;
-      responses.push(
-        neutralResponses[Math.floor(Math.random() * neutralResponses.length)]
-      );
-    }
-
-    // Next question
-    if (stage < currentBot.conversationFlow.length - 1) {
-      responses.push(currentBot.conversationFlow[stage + 1].question);
-    }
-
-    return responses;
-  };
+  // LLM handles responses; local heuristic removed
 
   const handleConversationEnd = () => {
-    const responses = [
-      "Thank you so much for this wonderful feedback! 📋 Let me create a summary for your child's teacher...",
-    ];
-
+    // keep teacher summary available if needed
     setTimeout(() => {
       showTeacherSummary();
     }, 2000);
-
-    return responses;
   };
 
   const generateSummary = () => {
@@ -479,29 +278,7 @@ ${feedbackCollected
     generateBotResponse(userMessage);
   };
 
-  const renderQuickResponses = () => {
-    if (!showQuickResponses || !currentBot?.conversationFlow) return null;
-
-    const currentStage = currentBot.conversationFlow[conversationStage];
-    if (!currentStage?.quickResponses) return null;
-
-    return (
-      <View style={styles.quickResponseContainer}>
-        <Text style={styles.quickResponseTitle}>Quick responses:</Text>
-        <View style={styles.quickResponseButtons}>
-          {currentStage.quickResponses.map((response, index) => (
-            <Pressable
-              key={index}
-              style={styles.quickResponseButton}
-              onPress={() => handleQuickResponse(response)}
-            >
-              <Text style={styles.quickResponseText}>{response}</Text>
-            </Pressable>
-          ))}
-        </View>
-      </View>
-    );
-  };
+  const renderQuickResponses = () => null;
 
   const renderTeacherCard = ({ item }) => (
     <Pressable
@@ -681,8 +458,6 @@ ${feedbackCollected
         {messages.map(renderMessage)}
         {renderTypingIndicator()}
       </ScrollView>
-
-      {renderQuickResponses()}
 
       <View style={styles.inputContainer}>
         <TextInput

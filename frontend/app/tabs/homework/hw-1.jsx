@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import React, { useState, useEffect } from "react";
-=======
 import React, { useState, useRef } from "react";
->>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
 import {
   View,
   Text,
@@ -17,14 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import * as Speech from "expo-speech";
-<<<<<<< HEAD
-import { useUser } from '../../userContext';
-import * as api from '../../api';
-import { Audio } from 'expo-av';
-import { Alert } from 'react-native';
-=======
 import { Audio } from "expo-av";
->>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
 
 const styles = StyleSheet.create({
   container: {
@@ -384,36 +373,6 @@ export default function Hw1Screen() {
   const [currentStep, setCurrentStep] = useState("intro");
   const [audioPressed, setAudioPressed] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-<<<<<<< HEAD
-  const { token, selectedChildId } = useUser();
-  const [homeworkId, setHomeworkId] = useState(null);
-  const [words, setWords] = useState([]);
-  const [index, setIndex] = useState(0);
-  const [recordingObj, setRecordingObj] = useState(null);
-  const [isRecording, setIsRecording] = useState(false);
-  const [lastScore, setLastScore] = useState(null);
-  const [lastFeedback, setLastFeedback] = useState(null);
-
-  useEffect(() => {
-    // If homeworkId was passed as query param, use startHomework
-    const hwId = router.params?.homeworkId;
-    if (hwId && token) {
-      (async () => {
-        try {
-          const data = await api.startHomework(hwId, token);
-          // data.words available; we keep homeworkId for submit
-          setHomeworkId(hwId);
-          const w = data.words || [];
-          setWords(w);
-          setIndex(0);
-          console.log('Started homework', data);
-        } catch (err) {
-          console.warn('Failed to start homework', err);
-        }
-      })();
-    }
-  }, [router.params, token]);
-=======
   const [isRecording, setIsRecording] = useState(false);
   const [recordPressed, setRecordPressed] = useState(false);
   const [pronunciationFeedback, setPronunciationFeedback] = useState(null);
@@ -424,7 +383,6 @@ export default function Hw1Screen() {
   const recording = useRef(null);
   const recordingUri = useRef(null);
   const playbackSound = useRef(null);
->>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
 
   const currentWord = "panda";
   const currentEmoji = "🐼";
@@ -807,91 +765,6 @@ export default function Hw1Screen() {
     );
   };
 
-<<<<<<< HEAD
-  // Minimal submit simulation — in the real app we'd upload recorded audio per-word and then call submit
-  const handleFinishAndSubmit = async () => {
-    if (!homeworkId || !selectedChildId || !token) {
-      // Navigate to next screen or show info
-      router.push('/tabs/homework/hw-2');
-      return;
-    }
-    try {
-      // In a full flow you'd upload files with FormData per word using api.uploadWordRecording
-      const res = await api.submitHomework(homeworkId, selectedChildId, 30, token);
-      console.log('Submit result', res);
-      // Navigate to next screen or results
-      router.push('/tabs/homework/hw-2');
-    } catch (err) {
-      console.error('Submit failed', err);
-      router.push('/tabs/homework/hw-2');
-    }
-  };
-
-  // Recording helpers
-  const ensurePermissions = async () => {
-    const { status } = await Audio.requestPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission required', 'Audio recording permission is required to submit homework');
-      return false;
-    }
-    await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
-    return true;
-  };
-
-  const startRecording = async () => {
-    try {
-      const ok = await ensurePermissions();
-      if (!ok) return;
-      const recording = new Audio.Recording();
-      await recording.prepareToRecordAsync(Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY);
-      await recording.startAsync();
-      setRecordingObj(recording);
-      setIsRecording(true);
-    } catch (err) {
-      console.error('startRecording error', err);
-    }
-  };
-
-  const stopRecordingAndUpload = async () => {
-    try {
-      if (!recordingObj) return;
-      await recordingObj.stopAndUnloadAsync();
-      const uri = recordingObj.getURI();
-      setIsRecording(false);
-      setRecordingObj(null);
-      console.log('Recorded uri', uri);
-
-      // Upload to backend for current word
-      const current = words[index];
-      if (!current || !homeworkId || !selectedChildId) {
-        Alert.alert('Missing data', 'Cannot upload without homework and student selected');
-        return;
-      }
-
-      const formData = new FormData();
-      const filename = uri.split('/').pop();
-      formData.append('file', { uri, name: filename || `rec-${Date.now()}.m4a`, type: 'audio/m4a' });
-      formData.append('studentId', selectedChildId);
-      formData.append('isParent', 'false');
-
-      const resp = await api.uploadWordRecording(homeworkId, current._id, formData, token);
-      console.log('upload resp', resp);
-      setLastScore(resp.score);
-      setLastFeedback(resp.feedback);
-
-      // Advance to next word after short delay
-      setTimeout(() => {
-        if (index + 1 < words.length) setIndex(index + 1);
-        else handleFinishAndSubmit();
-      }, 800);
-    } catch (err) {
-      console.error('stopRecordingAndUpload error', err);
-      Alert.alert('Upload failed', String(err?.message || err));
-      setIsRecording(false);
-      setRecordingObj(null);
-    }
-  };
-=======
   const renderFeedback = () => {
     if (!pronunciationFeedback) return null;
 
@@ -971,7 +844,6 @@ export default function Hw1Screen() {
   const stepInfo = getStepInfo();
   const canProceed =
     currentStep === "complete" && pronunciationFeedback?.type === "success";
->>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
 
   return (
     <SafeAreaView style={styles.container}>
@@ -1013,45 +885,6 @@ export default function Hw1Screen() {
             <Text style={styles.word}>{words[index]?.word || currentWord}</Text>
           </View>
 
-<<<<<<< HEAD
-          {/* Audio Button / Recording */}
-          <View style={{ marginTop: 12, alignItems: 'center' }}>
-            <Pressable
-              style={[
-                styles.audioButton,
-                audioPressed && styles.audioButtonPressed,
-                isSpeaking && { backgroundColor: "#ff6b35" },
-              ]}
-              onPress={handleAudioPress}
-              onPressIn={() => setAudioPressed(true)}
-              onPressOut={() => setAudioPressed(false)}
-            >
-              <Ionicons
-                name={isSpeaking ? "volume-high" : "volume-high"}
-                size={36}
-                color="#fff"
-              />
-            </Pressable>
-
-            <View style={{ height: 12 }} />
-
-            <Pressable
-              style={[styles.nextButton, { backgroundColor: isRecording ? '#ef4444' : '#34C759', paddingVertical: 12 }]}
-              onPress={isRecording ? stopRecordingAndUpload : startRecording}
-            >
-              <Text style={[styles.nextButtonText, { fontSize: 16 }]}>{isRecording ? 'Stop & Upload' : 'Record'}</Text>
-            </Pressable>
-
-            {lastScore != null && (
-              <View style={{ marginTop: 12, alignItems: 'center' }}>
-                <Text style={{ color: '#333' }}>Score: {lastScore}</Text>
-                <Text style={{ color: '#666' }}>{lastFeedback}</Text>
-              </View>
-            )}
-          </View>
-        </View>
-      </View>
-=======
           {currentStep !== "complete" && (
             <View style={styles.buttonRow}>
               <Pressable
@@ -1116,7 +949,6 @@ export default function Hw1Screen() {
           {renderFeedback()}
         </View>
       </ScrollView>
->>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
 
       <View style={styles.bottomSection}>
         <Pressable

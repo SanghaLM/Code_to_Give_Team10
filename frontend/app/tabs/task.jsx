@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
-=======
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, Modal } from 'react-native';
->>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useUser } from '../userContext';
@@ -265,38 +260,10 @@ const styles = StyleSheet.create({
 
 export default function TaskScreen() {
   const router = useRouter();
+  const { childrenList, selectedChildId, setSelectedChildId } = useUser();
   const [activeTab, setActiveTab] = useState('All');
   const [expandedBooklets, setExpandedBooklets] = useState([1]); // Booklet 2 is expanded by default
-<<<<<<< HEAD
-  const { token, selectedChildId, childrenList, setSelectedChildId } = useUser();
-  const [booklets, setBooklets] = useState(null);
-
-  useEffect(() => {
-    // Fetch assigned homeworks for selected child
-    async function loadHomeworks() {
-      if (!selectedChildId || !token) return;
-      try {
-        const hw = await api.getChildrenHomeworks(selectedChildId, token);
-        // Map backend homework assignments to booklet-like structure
-        const mapped = (hw || []).map((h, idx) => ({
-          id: idx + 1,
-          homeworkId: h._id,
-          title: h.title,
-          status: '0/4 Modules Finished',
-          color1: '#E4EDF5',
-          color2: '#0340A4',
-          modules: (h.words || []).map((w) => ({ name: w.word, completed: false, dueDate: h.dueDate ? new Date(h.dueDate).toDateString() : '-' })),
-        }));
-        setBooklets(mapped);
-      } catch (err) {
-        console.warn('Failed to load homeworks', err);
-      }
-    }
-    loadHomeworks();
-  }, [selectedChildId, token]);
-=======
   const [showSubmissionModal, setShowSubmissionModal] = useState(false);
->>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
 
   const toggleBooklet = (bookletId) => {
     setExpandedBooklets(prev => 
@@ -306,10 +273,6 @@ export default function TaskScreen() {
     );
   };
 
-<<<<<<< HEAD
-  // Use fetched booklets if available, otherwise fallback to static booklets
-  const displayBooklets = booklets || [
-=======
   const handleSubmitPress = () => {
     setShowSubmissionModal(true);
   };
@@ -325,7 +288,6 @@ export default function TaskScreen() {
   };
 
   const booklets = [
->>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
     {
       id: 1,
       title: 'Booklet 1',
@@ -340,6 +302,9 @@ export default function TaskScreen() {
       ]
     },
   ];
+
+  // For now show all booklets; later this can filter by activeTab or selected child
+  const displayBooklets = booklets;
 
   return (
     <ScrollView
@@ -448,15 +413,7 @@ export default function TaskScreen() {
                       {!module.completed && (
                         <Pressable
                           style={styles.submitButton}
-<<<<<<< HEAD
-                          onPress={() => {
-                            // Navigate to homework flow. If homeworkId exists, pass it.
-                            if (booklet.homeworkId) router.push(`/tabs/homework/instructions?homeworkId=${booklet.homeworkId}`);
-                            else router.push('/tabs/homework/hw-1');
-                          }}
-=======
                           onPress={handleSubmitPress}
->>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
                         >
                           <Text style={styles.submitButtonText}>Submit</Text>
                         </Pressable>

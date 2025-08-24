@@ -76,12 +76,12 @@ function Post({ post, onReact, onAddComment, onReport }) {
 				</TouchableOpacity>
 			</View>
 			<View style={styles.commentsSection}>
-				{post.comments.map(c => (
-					<Text key={c.id} style={styles.comment}>
-						<Text style={{ fontWeight: 'bold' }}>{c.username}: </Text>
-						{c.text}
-					</Text>
-				))}
+					{(post.comments || []).map((c, ci) => (
+						<Text key={`${String(c.id || c._id || 'comment')}-${ci}`} style={styles.comment}>
+							<Text style={{ fontWeight: 'bold' }}>{c.username}: </Text>
+							{c.text}
+						</Text>
+					))}
 				<View style={styles.addCommentRow}>
 					<TextInput
 						style={styles.commentInput}
@@ -108,13 +108,13 @@ export default function PublicPosts({ posts, onReact, onAddComment, onReport }) 
 	return (
 		<FlatList
 			data={posts}
-			keyExtractor={item => item.id}
-			renderItem={({ item }) => (
+			keyExtractor={(item, index) => `${String(item.id || item._id || 'post')}-${index}`}
+			renderItem={({ item, index }) => (
 				<Post
 					post={item}
-					onReact={() => onReact(item.id)}
-					onAddComment={comment => onAddComment(item.id, comment)}
-					onReport={() => onReport && onReport(item.id)}
+					onReact={() => onReact(item.id || item._id || index)}
+					onAddComment={comment => onAddComment(item.id || item._id || index, comment)}
+					onReport={() => onReport && onReport(item.id || item._id || index)}
 				/>
 			)}
 			ListFooterComponent={<View style={{ height: 80 }} />} // Spacer for footer message and FAB

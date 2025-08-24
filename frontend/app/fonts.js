@@ -34,3 +34,10 @@ export const getFontFamily = (weight = 'regular', italic = false) => {
   }
   return italic ? fontFamily.regularItalic : fontFamily.regular;
 };
+
+// Provide a harmless default export so Expo's file-based router doesn't treat
+// this file as a screen without a default export.
+import React from 'react';
+export default function FontsModule() {
+  return null;
+}

@@ -1,5 +1,12 @@
 // Minimal API client for the REACH backend
-const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
+import { Platform } from 'react-native';
+// On Android emulators, 'localhost' refers to the emulator itself. Use 10.0.2.2
+// to reach the host machine. Allow EXPO_PUBLIC_API_URL to override for LAN or prod.
+const DEFAULT_LOCAL_API = Platform.OS === 'android' ? 'http://10.0.2.2:3000/api' : 'http://localhost:3000/api';
+const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://10.113.85.55:3000/api';
+console.log('API_BASE set to', API_BASE);
+
+console.log('API_BASE set to', API_BASE);
 
 export async function request(path, options = {}, token) {
   const headers = options.headers || {};
@@ -84,10 +91,14 @@ export async function listPublicPosts() {
   return request(`/public/posts`, { method: 'GET' });
 }
 
-export async function createPublicPost(author, text, image, token, category = 'forfun') {
+export async function createPublicPost(author, text, image, token, category = 'forfun', username, avatar) {
+  // include optional username/avatar so frontends can persist display info
+  const payload = { author, text, image, category };
+  if (username) payload.username = username;
+  if (avatar) payload.avatar = avatar;
   return request(`/public/posts`, {
     method: 'POST',
-    body: JSON.stringify({ author, text, image, category }),
+    body: JSON.stringify(payload),
   }, token);
 }
 
@@ -112,6 +123,13 @@ export async function reportPublicPost(postId, token) {
 
 export async function getLeaderboard() {
   return request(`/public/leaderboard`, { method: 'GET' });
+}
+
+export async function llmReply(message, botId) {
+  return request(`/public/llm/reply`, {
+    method: 'POST',
+    body: JSON.stringify({ message, botId }),
+  });
 }
 
 export default { request };

@@ -5,11 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import NewPublicPost from './NewPublicPost';
 import PublicPosts from './PublicPosts';
 import Modal from 'react-native-modal';
-<<<<<<< HEAD
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as api from '../../api';
 import { useUser } from '../../userContext';
-=======
 
 const initialPosts = [
 	{
@@ -28,17 +25,17 @@ const initialPosts = [
 		id: '2',
 		username: 'Frank',
 		avatar: 'https://randomuser.me/api/portraits/men/4.jpg',
-		text: 'Who wants to play chess online?',
+		text: 'Who wants to play chess online? I bet I\'m better than everyone at it.',
 		image: null,
 		reactions: 2,
 		comments: [],
 		timestamp: '2h ago',
 	},
 ];
->>>>>>> 67f4064f4fc5ef39eb8f026a665b45f8c6a7eae9
 
 export default function ForFun() {
-	const [posts, setPosts] = useState([]);
+	// show a small set of hardcoded posts immediately as a fallback / demo
+	const [posts, setPosts] = useState(initialPosts);
 	const [modalVisible, setModalVisible] = useState(false);
 	const [reactedPostIds, setReactedPostIds] = useState([]);
 	const { username } = useUser();
@@ -46,18 +43,35 @@ export default function ForFun() {
 	const load = async () => {
 			try {
 				const res = await api.listPublicPostsByCategory('forfun');
-				setPosts(res.posts || []);
+				// only replace local hardcoded posts when server returns items
+				if (res && Array.isArray(res.posts) && res.posts.length > 0) {
+					setPosts(res.posts);
+				}
 			} catch (err) {
-			console.warn('Failed to load public posts', err);
-		}
+				console.warn('Failed to load public posts', err);
+			}
 	};
 
 	useEffect(() => { load(); }, []);
 
 	const handleAddPost = async (text, image) => {
 			try {
-				const res = await api.createPublicPost(username || 'You', text, image, null, 'forfun');
-				setPosts(prev => [res.post, ...prev]);
+				// pass username/avatar so server can persist display info
+				const sendUsername = (username || '').toLowerCase() === 'sarahchen' ? 'Sarah Chen' : (username || 'You');
+				const sendAvatar = (username || '').toLowerCase() === 'sarahchen' ? 'https://randomuser.me/api/portraits/women/65.jpg' : undefined;
+				const res = await api.createPublicPost(username || 'sarahchen', text, image, null, 'forfun', sendUsername, sendAvatar);
+				// Augment the returned post so the feed has username and avatar fields the UI expects.
+				let newPost = res.post || {};
+				if ((username || '').toLowerCase() === 'sarahchen') {
+					newPost = {
+						...newPost,
+						username: 'Sarah Chen',
+						avatar: 'https://randomuser.me/api/portraits/women/65.jpg',
+					};
+				} else {
+					newPost = { ...newPost, username: newPost.author || username || 'You' };
+				}
+				setPosts(prev => [newPost, ...prev]);
 				setModalVisible(false);
 			} catch (err) {
 			console.error('Failed to create post', err);
@@ -87,6 +101,8 @@ export default function ForFun() {
 	const handleReport = async (postId) => {
 		try {
 			await api.request(`/public/posts/${postId}/report`, { method: 'POST' });
+			// Remove reported post from local feed to match HomeworkHelp behavior
+			setPosts(prev => prev.filter(p => String(p.id || p._id) !== String(postId)));
 		} catch (err) {
 			console.warn('Report failed', err);
 		}
