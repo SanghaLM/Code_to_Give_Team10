@@ -2,26 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Radar } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-
-// Register Chart.js components
-ChartJS.register(
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-  Tooltip,
-  Legend
-);
+import { RadarChart } from 'react-native-gifted-charts';
 
 // Mock data for individual child progress
 const mockChildrenData = {
@@ -260,9 +241,11 @@ const styles = StyleSheet.create({
   },
   radarChartContainer: {
     width: '100%',
-    height: 300,
+    height: 380,
     marginVertical: 20,
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    alignItems: 'center',
   },
   skillsGrid: {
     flexDirection: 'row',
@@ -275,16 +258,11 @@ const styles = StyleSheet.create({
     width: '48%',
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 12,
     padding: 8,
     backgroundColor: '#f8f9fa',
     borderRadius: 8,
-  },
-  skillDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 8,
   },
   skillName: {
     flex: 1,
@@ -474,14 +452,14 @@ export default function ChildProgressScreen() {
   const childData = mockChildrenData[childName] || mockChildrenData["Emma"];
   const [showHistoricalData, setShowHistoricalData] = useState(false);
 
-  // Skill area definitions with colors matching the app theme
+  // Skill area definitions
   const skillAreas = [
-    { key: 'alphabetRecognition', name: 'Alphabet Recognition', color: '#F7941F' },
-    { key: 'phonemicAwareness', name: 'Phonemic Awareness', color: '#9957B3' },
-    { key: 'consistency', name: 'Consistency', color: '#0340A4' },
-    { key: 'vocabulary', name: 'Vocabulary', color: '#10b981' },
-    { key: 'timeliness', name: 'Timeliness', color: '#3b82f6' },
-    { key: 'pointAndRead', name: 'Point and Read', color: '#8b5cf6' }
+    { key: 'alphabetRecognition', name: 'Alphabet Recognition' },
+    { key: 'phonemicAwareness', name: 'Phonemic Awareness' },
+    { key: 'consistency', name: 'Consistency' },
+    { key: 'vocabulary', name: 'Vocabulary' },
+    { key: 'timeliness', name: 'Timeliness' },
+    { key: 'pointAndRead', name: 'Point and Read' }
   ];
 
 
@@ -543,154 +521,86 @@ export default function ChildProgressScreen() {
     </View>
   );
 
-  // Prepare chart data for Chart.js radar chart
-  const prepareChartData = () => {
+  // Prepare chart data for React Native Gifted Charts RadarChart
+  const prepareRadarData = () => {
     const labels = skillAreas.map(area => area.name);
     const currentData = skillAreas.map(area => childData.skills[area.key]?.level || 1);
     
-    const datasets = [{
-      label: 'Current Level',
-      data: currentData,
-      fill: true,
-      backgroundColor: 'rgba(247, 148, 31, 0.2)',
-      borderColor: '#F7941F',
-      pointBackgroundColor: '#F7941F',
-      pointBorderColor: '#fff',
-      pointHoverBackgroundColor: '#fff',
-      pointHoverBorderColor: '#F7941F',
-      borderWidth: 2,
-      pointRadius: 4,
-      pointHoverRadius: 6,
-    }];
-
-    // Add historical data if toggled on
+    // For historical data, create multiple datasets for progress tracking
+    let historicalDataSets = [];
+    
     if (showHistoricalData && childData.skillsHistory) {
-      const colors = ['rgba(153, 87, 179, 0.2)', 'rgba(3, 64, 164, 0.2)', 'rgba(16, 185, 129, 0.2)'];
-      const borderColors = ['#9957B3', '#0340A4', '#10b981'];
-      
       // Show up to 3 historical data points
-      childData.skillsHistory.slice(-3).forEach((historyPoint, index) => {
-        const historicalData = skillAreas.map(area => historyPoint.skills[area.key] || 1);
-        datasets.push({
-          label: new Date(historyPoint.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          data: historicalData,
-          fill: true,
-          backgroundColor: colors[index] || colors[0],
-          borderColor: borderColors[index] || borderColors[0],
-          pointBackgroundColor: borderColors[index] || borderColors[0],
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: borderColors[index] || borderColors[0],
-          borderWidth: 2,
-          pointRadius: 3,
-          pointHoverRadius: 5,
-        });
-      });
+      historicalDataSets = childData.skillsHistory.slice(-3).map((historyPoint, index) => ({
+        data: skillAreas.map(area => historyPoint.skills[area.key] || 1),
+        label: new Date(historyPoint.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        color: ['#9957B3', '#0340A4', '#10b981'][index] || '#9957B3'
+      }));
     }
 
-    return { labels, datasets };
-  };
-
-  // Chart options with relative scaling
-  const getChartOptions = () => {
-    const allLevels = [];
-    
-    // Collect all current levels
-    skillAreas.forEach(area => {
-      allLevels.push(childData.skills[area.key]?.level || 1);
-    });
-    
-    // If showing historical data, include those levels too
-    if (showHistoricalData && childData.skillsHistory) {
-      childData.skillsHistory.forEach(historyPoint => {
-        skillAreas.forEach(area => {
-          allLevels.push(historyPoint.skills[area.key] || 1);
-        });
-      });
-    }
-    
-    const minLevel = Math.min(...allLevels);
-    const maxLevel = Math.max(...allLevels);
-    
-    // Create relative scale - expand range slightly for better visualization
-    const range = maxLevel - minLevel;
-    const suggestedMin = Math.max(1, minLevel - Math.ceil(range * 0.1));
-    const suggestedMax = Math.min(10, maxLevel + Math.ceil(range * 0.1));
-
-    return {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            font: {
-              family: 'BalsamiqSans_400Regular',
-              size: 12,
-            },
-            color: '#666',
-            padding: 15,
-          },
-        },
-        tooltip: {
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          titleColor: '#fff',
-          bodyColor: '#fff',
-          borderColor: '#F7941F',
-          borderWidth: 1,
-        },
-      },
-      scales: {
-        r: {
-          angleLines: {
-            display: true,
-            color: 'rgba(0, 0, 0, 0.1)',
-            lineWidth: 1,
-          },
-          grid: {
-            color: 'rgba(0, 0, 0, 0.1)',
-            lineWidth: 1,
-          },
-          pointLabels: {
-            font: {
-              family: 'BalsamiqSans_400Regular',
-              size: 11,
-              weight: '600',
-            },
-            color: '#333',
-            padding: 10,
-          },
-          ticks: {
-            display: true,
-            font: {
-              family: 'BalsamiqSans_400Regular',
-              size: 10,
-            },
-            color: '#999',
-            backdropColor: 'rgba(255, 255, 255, 0.8)',
-            backdropPadding: 2,
-          },
-          suggestedMin: suggestedMin,
-          suggestedMax: suggestedMax,
-          beginAtZero: false,
-        },
-      },
-      elements: {
-        line: {
-          borderWidth: 2,
-        },
-        point: {
-          radius: 4,
-          hoverRadius: 6,
-        },
-      },
+    return { 
+      labels, 
+      currentData,
+      historicalDataSets,
+      maxValue: Math.max(...currentData, ...(historicalDataSets.flatMap(set => set.data) || []))
     };
   };
 
+  // Radar chart configuration for React Native Gifted Charts
+  const getRadarConfig = (maxValue) => {
+    // Calculate dynamic max value with some padding
+    const suggestedMax = Math.ceil(maxValue * 1.2);
+    
+    return {
+      // Main chart configuration
+      chartSize: 280,
+      maxValue: suggestedMax,
+      noOfSections: 4,
+      
+      // Grid configuration
+      gridConfig: {
+        stroke: 'rgba(0, 0, 0, 0.1)',
+        strokeWidth: 1,
+        fill: 'rgba(255, 255, 255, 0.02)',
+        opacity: 0.8,
+      },
+      
+      // Label configuration - improved for better visibility
+      labelConfig: {
+        fontSize: 16,
+        stroke: '#000000',
+        fontWeight: 'bold',
+        textAnchor: 'middle',
+        alignmentBaseline: 'middle',
+        fontFamily: 'BalsamiqSans_700Bold',
+      },
+      
+      // Data labels configuration
+      dataLabelsConfig: {
+        fontSize: 10,
+        fontWeight: 'bold',
+      },
+      
+      // Animation
+      isAnimated: true,
+      animationDuration: 800,
+      
+      // Positioning - adjusted offset for label visibility
+      labelsPositionOffset: 20,
+    };
+  };
+
+
+
   const renderSkillsSection = () => {
     const summary = getSkillSummary();
-    const chartData = prepareChartData();
-    const chartOptions = getChartOptions();
+    const { labels, currentData, historicalDataSets, maxValue } = prepareRadarData();
+    const radarConfig = getRadarConfig(maxValue);
+    
+    // Debug logs to verify data structure
+    console.log('RadarChart Debug - Labels:', labels);
+    console.log('RadarChart Debug - CurrentData:', currentData);
+    console.log('RadarChart Debug - RadarConfig:', radarConfig);
     
     return (
       <View style={styles.skillsCard}>
@@ -711,14 +621,48 @@ export default function ChildProgressScreen() {
           </Pressable>
         </View>
 
-        {/* Chart.js Radar Chart */}
+        {/* React Native Gifted Charts Radar Chart */}
         <View style={styles.chartContainer}>
           <Text style={styles.chartNote}>
             📊 Skills Overview - {showHistoricalData ? 'Progress Over Time' : 'Current Levels'}
           </Text>
           
           <View style={styles.radarChartContainer}>
-            <Radar data={chartData} options={chartOptions} />
+            {showHistoricalData && historicalDataSets.length > 0 ? (
+              <RadarChart
+                dataSet={[currentData, ...historicalDataSets.map(set => set.data)]}
+                labels={labels}
+                hideLabels={false}
+                {...radarConfig}
+                polygonConfigArray={[
+                  {
+                    stroke: '#F7941F',
+                    strokeWidth: 2,
+                    fill: 'rgba(247, 148, 31, 0.2)',
+                    opacity: 0.8,
+                  },
+                  ...historicalDataSets.map(set => ({
+                    stroke: set.color,
+                    strokeWidth: 2,
+                    fill: `${set.color}33`, // Add transparency
+                    opacity: 0.6,
+                  }))
+                ]}
+              />
+            ) : (
+              <RadarChart
+                data={currentData}
+                labels={labels}
+                hideLabels={false}
+                {...radarConfig}
+                polygonConfig={{
+                  stroke: '#F7941F',
+                  strokeWidth: 2,
+                  fill: 'rgba(247, 148, 31, 0.2)',
+                  opacity: 0.8,
+                }}
+              />
+            )}
           </View>
           
           {/* Skill Levels Display */}
@@ -729,7 +673,6 @@ export default function ChildProgressScreen() {
               
               return (
                 <View key={area.key} style={styles.skillItem}>
-                  <View style={[styles.skillDot, { backgroundColor: area.color }]} />
                   <Text style={styles.skillName}>{area.name}</Text>
                   <Text style={styles.skillLevel}>Level {level}</Text>
                 </View>

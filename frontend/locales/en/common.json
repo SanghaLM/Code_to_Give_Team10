@@ -1,0 +1,20 @@
+{
+  "login": {
+    "appName": "ReachOut",
+    "tagline": "Your Learning Journey Starts Here",
+    "welcomeBack": "Welcome Back!",
+    "createAccount": "Create Account",
+    "username": "Username",
+    "password": "Password",
+    "accessCode": "Access Code (from administrator)",
+    "loginButton": "Login",
+    "createAccountButton": "Create Account",
+    "switchToCreate": "Need an account? ",
+    "switchToCreateLink": "Create one",
+    "switchToLogin": "Already have an account? ",
+    "switchToLoginLink": "Login",
+    "instructionsTitle": "👨‍👩‍👧‍👦 Parent & Child Activity",
+    "instructions": "All fields are required. Set your own username and password for logging in later. The access code is provided by the administrators.",
+    "letsBegin": "Let's Begin!"
+  }
+}

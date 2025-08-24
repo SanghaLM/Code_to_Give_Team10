@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Alert, Pressable, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useUser } from './userContext';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 
 export default function Login() {
+  const { t } = useTranslation('common');
   const [username, setUsernameInput] = useState('');
   const [password, setPassword] = useState('');
   const [accessCode, setAccessCode] = useState('');
@@ -53,24 +56,27 @@ export default function Login() {
       >
         {/* Header Section */}
         <View style={styles.headerSection}>
-          <View style={styles.logoContainer}>
-            <Text style={styles.logoEmoji}>🎓</Text>
-            <Text style={styles.appName}>ReachOut</Text>
+          <View style={styles.headerTop}>
+            <View style={styles.logoContainer}>
+              <Text style={styles.logoEmoji}>🎓</Text>
+              <Text style={styles.appName}>{t('login.appName')}</Text>
+            </View>
+            <LanguageSwitcher />
           </View>
-          <Text style={styles.tagline}>Your Learning Journey Starts Here</Text>
+          <Text style={styles.tagline}>{t('login.tagline')}</Text>
         </View>
 
         {/* Login Card */}
         <View style={styles.loginCard}>
           <Text style={styles.title}>
-            {isCreating ? 'Create Account' : 'Welcome Back!'}
+            {isCreating ? t('login.createAccount') : t('login.welcomeBack')}
           </Text>
           
           {isCreating && (
             <View style={styles.instructionsCard}>
               <Ionicons name="information-circle" size={20} color="#F7941F" />
               <Text style={styles.instructions}>
-                All fields are required. Set your own username and password for logging in later. The access code is provided by the administrators.
+                {t('login.instructions')}
               </Text>
             </View>
           )}
@@ -80,7 +86,7 @@ export default function Login() {
             <Ionicons name="person" size={20} color="#6b7280" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
-              placeholder="Username"
+              placeholder={t('login.username')}
               value={username}
               onChangeText={setUsernameInput}
               autoCapitalize="none"
@@ -92,7 +98,7 @@ export default function Login() {
             <Ionicons name="lock-closed" size={20} color="#6b7280" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
-              placeholder="Password"
+              placeholder={t('login.password')}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -105,7 +111,7 @@ export default function Login() {
               <Ionicons name="key" size={20} color="#6b7280" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
-                placeholder="Access Code (from administrator)"
+                placeholder={t('login.accessCode')}
                 value={accessCode}
                 onChangeText={setAccessCode}
                 placeholderTextColor="#9ca3af"
@@ -119,7 +125,7 @@ export default function Login() {
             onPress={isCreating ? handleCreateAccount : handleLogin}
           >
             <Text style={styles.loginButtonText}>
-              {isCreating ? 'Create Account' : 'Login'}
+              {isCreating ? t('login.createAccountButton') : t('login.loginButton')}
             </Text>
             <Ionicons name="arrow-forward" size={20} color="#fff" />
           </Pressable>
@@ -131,10 +137,10 @@ export default function Login() {
           onPress={() => setIsCreating(!isCreating)}
         >
           <Text style={styles.switchText}>
-            {isCreating ? 'Already have an account? ' : 'Need an account? '}
+            {isCreating ? t('login.switchToLogin') : t('login.switchToCreate')}
           </Text>
           <Text style={styles.switchLink}>
-            {isCreating ? 'Login' : 'Create one'}
+            {isCreating ? t('login.switchToLoginLink') : t('login.switchToCreateLink')}
           </Text>
         </Pressable>
       </ScrollView>
@@ -159,10 +165,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 40,
   },
+  headerTop: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
   logoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
   },
   logoEmoji: {
     fontSize: 40,

@@ -11,6 +11,7 @@ import {
 } from '@expo-google-fonts/balsamiq-sans';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { UserProvider, useUser } from './userContext';
+import '../i18n/i18n'; // Initialize i18n
 
 const styles = StyleSheet.create({
   loadingContainer: {
