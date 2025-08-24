@@ -1,16 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
   Pressable,
   SafeAreaView,
-  Image,
   Animated,
+  Alert,
+  Image,
+  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import * as Speech from "expo-speech";
+import { Audio } from "expo-av";
 
 const styles = StyleSheet.create({
   container: {
@@ -54,18 +57,63 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 30,
   },
+  instructionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 15,
+  },
+  instructionIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
   instruction: {
-    fontSize: 28,
-    fontWeight: "bold",
+    fontSize: 24,
+    fontFamily: "BalsamiqSans_700Bold",
     color: "#000",
-    textAlign: "center",
-    fontFamily: "BalsamiqSans_400Regular",
+    textAlign: "left",
+    flex: 1,
+  },
+  stepIndicator: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+    paddingHorizontal: 20,
+  },
+  stepDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#e0e0e0",
+    marginHorizontal: 5,
+  },
+  stepDotActive: {
+    backgroundColor: "#FF9500",
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+  },
+  stepDotCompleted: {
+    backgroundColor: "#4CAF50",
+  },
+  stepLine: {
+    height: 2,
+    flex: 1,
+    backgroundColor: "#e0e0e0",
+    marginHorizontal: 10,
+  },
+  stepLineCompleted: {
+    backgroundColor: "#4CAF50",
   },
   mainContent: {
     flex: 1,
-    justifyContent: "center",
+  },
+  scrollContent: {
+    flexGrow: 1,
     alignItems: "center",
     paddingHorizontal: 20,
+    paddingVertical: 20,
   },
   contentCard: {
     backgroundColor: "#f8f9fa",
@@ -81,6 +129,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
     minWidth: 280,
+    width: "100%",
   },
   emojiContainer: {
     width: 160,
@@ -108,10 +157,16 @@ const styles = StyleSheet.create({
   },
   word: {
     fontSize: 42,
-    fontWeight: "bold",
+    fontFamily: "BalsamiqSans_700Bold",
     color: "#007AFF",
     textAlign: "center",
-    fontFamily: "BalsamiqSans_400Regular",
+  },
+  buttonRow: {
+    flexDirection: "row",
+    gap: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
   },
   audioButton: {
     width: 70,
@@ -132,6 +187,107 @@ const styles = StyleSheet.create({
   audioButtonPressed: {
     backgroundColor: "#e6850e",
     transform: [{ scale: 0.95 }],
+  },
+  recordButton: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: "#FF3B30",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#FF3B30",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  recordButtonActive: {
+    backgroundColor: "#ff6b6b",
+    transform: [{ scale: 1.1 }],
+  },
+  recordButtonPressed: {
+    backgroundColor: "#d12b20",
+    transform: [{ scale: 0.95 }],
+  },
+  playButton: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: "#007AFF",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#007AFF",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  playButtonPressed: {
+    backgroundColor: "#0056b3",
+    transform: [{ scale: 0.95 }],
+  },
+  playButtonDisabled: {
+    backgroundColor: "#cccccc",
+    shadowColor: "#cccccc",
+  },
+  feedbackContainer: {
+    marginTop: 10,
+    padding: 15,
+    borderRadius: 12,
+    minWidth: 200,
+    alignItems: "center",
+    alignSelf: "stretch",
+    marginBottom: 10,
+  },
+  feedbackSuccess: {
+    backgroundColor: "#e8f5e8",
+    borderColor: "#4caf50",
+    borderWidth: 2,
+  },
+  feedbackRetry: {
+    backgroundColor: "#fff3e0",
+    borderColor: "#ff9800",
+    borderWidth: 2,
+  },
+  feedbackProcessing: {
+    backgroundColor: "#e3f2fd",
+    borderColor: "#2196f3",
+    borderWidth: 2,
+  },
+  characterContainer: {
+    marginBottom: 10,
+  },
+  character: {
+    fontSize: 40,
+    textAlign: "center",
+  },
+  feedbackText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+    fontFamily: "BalsamiqSans_400Regular",
+    marginBottom: 5,
+  },
+  feedbackTextSuccess: {
+    color: "#2e7d32",
+  },
+  feedbackTextRetry: {
+    color: "#f57c00",
+  },
+  feedbackTextProcessing: {
+    color: "#1976d2",
+  },
+  encouragementText: {
+    fontSize: 14,
+    fontStyle: "italic",
+    textAlign: "center",
+    fontFamily: "BalsamiqSans_400Regular",
   },
   bottomSection: {
     paddingHorizontal: 20,
@@ -155,7 +311,56 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
+  nextButtonDisabled: {
+    backgroundColor: "#cccccc",
+    shadowColor: "#cccccc",
+  },
   nextButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "600",
+    fontFamily: "BalsamiqSans_400Regular",
+  },
+  introContainer: {
+    backgroundColor: "#f0f8ff",
+    borderRadius: 15,
+    padding: 25,
+    margin: 20,
+    borderWidth: 2,
+    borderColor: "#007AFF",
+    alignItems: "center",
+  },
+  introTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#007AFF",
+    textAlign: "center",
+    fontFamily: "BalsamiqSans_400Regular",
+    marginBottom: 15,
+  },
+  introText: {
+    fontSize: 16,
+    color: "#333",
+    textAlign: "center",
+    fontFamily: "BalsamiqSans_400Regular",
+    lineHeight: 24,
+    marginBottom: 20,
+  },
+  okButton: {
+    backgroundColor: "#007AFF",
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 25,
+    shadowColor: "#007AFF",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  okButtonText: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "600",
@@ -165,43 +370,84 @@ const styles = StyleSheet.create({
 
 export default function Hw1Screen() {
   const router = useRouter();
+  const [currentStep, setCurrentStep] = useState("intro");
   const [audioPressed, setAudioPressed] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordPressed, setRecordPressed] = useState(false);
+  const [pronunciationFeedback, setPronunciationFeedback] = useState(null);
+  const [hasAttempted, setHasAttempted] = useState(false);
+  const [isPlayingRecording, setIsPlayingRecording] = useState(false);
+  const [hasRecording, setHasRecording] = useState(false);
 
-  // Word and emoji pairs
+  const recording = useRef(null);
+  const recordingUri = useRef(null);
+  const playbackSound = useRef(null);
+
   const currentWord = "panda";
   const currentEmoji = "🐼";
 
+  const setupAudio = async () => {
+    try {
+      await Audio.requestPermissionsAsync();
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+    } catch (error) {
+      console.log("Failed to setup audio:", error);
+    }
+  };
+
+  React.useEffect(() => {
+    setupAudio();
+  }, []);
+
+  React.useEffect(() => {
+    return () => {
+      if (playbackSound.current) {
+        playbackSound.current.unloadAsync();
+      }
+    };
+  }, []);
+
   const handleNext = () => {
-    // Stop any ongoing speech before navigating
     Speech.stop();
+    if (playbackSound.current) {
+      playbackSound.current.stopAsync();
+    }
     setTimeout(() => {
       router.push("/tabs/homework/hw-2");
     }, 1000);
+  };
+
+  const handleOkPress = () => {
+    setCurrentStep("demo");
   };
 
   const handleAudioPress = async () => {
     setAudioPressed(true);
 
     try {
-      // Stop any ongoing speech first
       await Speech.stop();
-
       setIsSpeaking(true);
 
-      // Configure TTS options
       const options = {
         language: "en-US",
         pitch: 1.0,
         rate: 0.8,
-        voice: null, // Use default voice
+        voice: null,
       };
 
-      // Speak the word
       Speech.speak(currentWord, {
         ...options,
         onDone: () => {
           setIsSpeaking(false);
+          if (currentStep === "demo") {
+            setTimeout(() => {
+              setCurrentStep("parent");
+            }, 1000);
+          }
         },
         onStopped: () => {
           setIsSpeaking(false);
@@ -216,10 +462,299 @@ export default function Hw1Screen() {
       setIsSpeaking(false);
     }
 
-    // Reset button state after animation
     setTimeout(() => {
       setAudioPressed(false);
     }, 200);
+  };
+
+  const startRecording = async () => {
+    try {
+      await Speech.stop();
+
+      const { status } = await Audio.requestPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission required",
+          "Please grant microphone permission to record audio."
+        );
+        return;
+      }
+
+      if (recording.current) {
+        await recording.current.stopAndUnloadAsync();
+        recording.current = null;
+      }
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      const recordingOptions = {
+        android: {
+          extension: ".m4a",
+          outputFormat: Audio.RECORDING_OPTION_ANDROID_OUTPUT_FORMAT_MPEG_4,
+          audioEncoder: Audio.RECORDING_OPTION_ANDROID_AUDIO_ENCODER_AAC,
+          sampleRate: 44100,
+          numberOfChannels: 2,
+          bitRate: 128000,
+        },
+        ios: {
+          extension: ".m4a",
+          outputFormat: Audio.RECORDING_OPTION_IOS_OUTPUT_FORMAT_MPEG4AAC,
+          audioQuality: Audio.RECORDING_OPTION_IOS_AUDIO_QUALITY_HIGH,
+          sampleRate: 44100,
+          numberOfChannels: 2,
+          bitRate: 128000,
+          linearPCMBitDepth: 16,
+          linearPCMIsBigEndian: false,
+          linearPCMIsFloat: false,
+        },
+      };
+
+      const { recording: newRecording } = await Audio.Recording.createAsync(
+        recordingOptions
+      );
+      recording.current = newRecording;
+      setIsRecording(true);
+      setPronunciationFeedback(null);
+    } catch (error) {
+      console.log("Failed to start recording:", error);
+      Alert.alert(
+        "Recording Error",
+        "Failed to start recording. Please try again."
+      );
+    }
+  };
+
+  const stopRecording = async () => {
+    setIsRecording(false);
+
+    if (!recording.current) {
+      return;
+    }
+
+    try {
+      await recording.current.stopAndUnloadAsync();
+      const uri = recording.current.getURI();
+      recordingUri.current = uri;
+      recording.current = null;
+      setHasRecording(true);
+      setHasAttempted(true);
+
+      await processPronunciation(uri);
+    } catch (error) {
+      console.log("Error stopping recording:", error);
+    }
+  };
+
+  const handleRecordPress = async () => {
+    if (isRecording) {
+      await stopRecording();
+    } else {
+      await startRecording();
+    }
+  };
+
+  const playRecording = async () => {
+    if (!recordingUri.current) {
+      Alert.alert("No Recording", "Please record your voice first!");
+      return;
+    }
+
+    try {
+      if (playbackSound.current) {
+        await playbackSound.current.unloadAsync();
+        playbackSound.current = null;
+      }
+
+      await Speech.stop();
+      setIsPlayingRecording(true);
+
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: recordingUri.current },
+        { shouldPlay: true }
+      );
+
+      playbackSound.current = sound;
+
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.didJustFinish) {
+          setIsPlayingRecording(false);
+        }
+      });
+    } catch (error) {
+      console.log("Error playing recording:", error);
+      setIsPlayingRecording(false);
+      Alert.alert(
+        "Playback Error",
+        "Could not play your recording. Please try recording again."
+      );
+    }
+  };
+
+  const processPronunciation = async (audioUri) => {
+    const isParentStep = currentStep === "parent";
+
+    setPronunciationFeedback({
+      type: "processing",
+      message: isParentStep
+        ? "Checking parent pronunciation..."
+        : "Let me listen...",
+      character: "🤖",
+      score: null,
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    if (isParentStep) {
+      setPronunciationFeedback({
+        type: "success",
+        message: "Perfect! Now help your child say it!",
+        character: "👨‍👩‍👧‍👦",
+        encouragement: "Great modeling!",
+        score: null,
+      });
+
+      setTimeout(() => {
+        setCurrentStep("child");
+        setPronunciationFeedback(null);
+        setHasRecording(false);
+        setHasAttempted(false);
+        recordingUri.current = null;
+      }, 3000);
+    } else {
+      const outcomes = [
+        {
+          type: "perfect",
+          message: "Perfect! You and your grown-up did great!",
+          character: "🌟",
+          encouragement: "Amazing teamwork!",
+        },
+        {
+          type: "great",
+          message: "Great job! Your grown-up helped you well!",
+          character: "🎉",
+          encouragement: "Keep practicing together!",
+        },
+        {
+          type: "good",
+          message: "Good try! Almost perfect!",
+          character: "👍",
+          encouragement: "You're learning together!",
+        },
+        {
+          type: "tryAgain",
+          message: "Close! Let's try once more!",
+          character: "🐻",
+          encouragement: "Listen and try again!",
+        },
+        {
+          type: "needsPractice",
+          message: "Let's practice together!",
+          character: "🦉",
+          encouragement: "Practice makes perfect!",
+        },
+      ];
+
+      const weights = [20, 30, 25, 15, 10];
+      const randomValue = Math.random() * 100;
+      let cumulativeWeight = 0;
+      let selectedOutcome = outcomes[0];
+
+      for (let i = 0; i < outcomes.length; i++) {
+        cumulativeWeight += weights[i];
+        if (randomValue <= cumulativeWeight) {
+          selectedOutcome = outcomes[i];
+          break;
+        }
+      }
+
+      setPronunciationFeedback({
+        type:
+          selectedOutcome.type === "tryAgain" ||
+          selectedOutcome.type === "needsPractice"
+            ? "retry"
+            : "success",
+        message: selectedOutcome.message,
+        character: selectedOutcome.character,
+        encouragement: selectedOutcome.encouragement,
+        score: null,
+      });
+
+      if (
+        selectedOutcome.type !== "tryAgain" &&
+        selectedOutcome.type !== "needsPractice"
+      ) {
+        setTimeout(() => {
+          setCurrentStep("complete");
+        }, 3000);
+      }
+    }
+  };
+
+  const getStepInfo = () => {
+    switch (currentStep) {
+      case "demo":
+        return {
+          instruction: "Listen, then say the word",
+          showDemo: true,
+          showRecord: false,
+          showPlayback: false,
+        };
+      case "parent":
+        return {
+          instruction: "Parent, record yourself saying the word",
+          showDemo: true,
+          showRecord: true,
+          showPlayback: hasRecording,
+        };
+      case "child":
+        return {
+          instruction: "Child, say the word with your grown-up!",
+          showDemo: true,
+          showRecord: true,
+          showPlayback: hasRecording,
+        };
+      case "complete":
+        return {
+          instruction: "Great job, team! You did it!",
+          showDemo: false,
+          showRecord: false,
+          showPlayback: false,
+        };
+      default:
+        return { instruction: "Listen, then say the word" };
+    }
+  };
+
+  const renderStepIndicator = () => {
+    const steps = ["demo", "parent", "child", "complete"];
+    const currentIndex = steps.indexOf(currentStep);
+
+    return (
+      <View style={styles.stepIndicator}>
+        {steps.map((step, index) => (
+          <React.Fragment key={step}>
+            <View
+              style={[
+                styles.stepDot,
+                index === currentIndex && styles.stepDotActive,
+                index < currentIndex && styles.stepDotCompleted,
+              ]}
+            />
+            {index < steps.length - 1 && (
+              <View
+                style={{
+                  ...styles.stepLine,
+                  ...(index < currentIndex && styles.stepLineCompleted),
+                }}
+              />
+            )}
+          </React.Fragment>
+        ))}
+      </View>
+    );
   };
 
   const renderEmoji = () => {
@@ -230,9 +765,88 @@ export default function Hw1Screen() {
     );
   };
 
+  const renderFeedback = () => {
+    if (!pronunciationFeedback) return null;
+
+    const feedbackStyle =
+      pronunciationFeedback.type === "success"
+        ? styles.feedbackSuccess
+        : pronunciationFeedback.type === "retry"
+        ? styles.feedbackRetry
+        : styles.feedbackProcessing;
+
+    const textStyle =
+      pronunciationFeedback.type === "success"
+        ? styles.feedbackTextSuccess
+        : pronunciationFeedback.type === "retry"
+        ? styles.feedbackTextRetry
+        : styles.feedbackTextProcessing;
+
+    return (
+      <View style={[styles.feedbackContainer, feedbackStyle]}>
+        {pronunciationFeedback.character && (
+          <View style={styles.characterContainer}>
+            <Text style={styles.character}>
+              {pronunciationFeedback.character}
+            </Text>
+          </View>
+        )}
+        <Text style={[styles.feedbackText, textStyle]}>
+          {pronunciationFeedback.message}
+        </Text>
+        {pronunciationFeedback.encouragement && (
+          <Text style={[styles.encouragementText, textStyle]}>
+            {pronunciationFeedback.encouragement}
+          </Text>
+        )}
+      </View>
+    );
+  };
+
+  if (currentStep === "intro") {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.topSection}>
+          <View style={styles.headerRow}>
+            <Pressable onPress={() => router.back()}>
+              <Ionicons name="arrow-back" size={24} color="#000" />
+            </Pressable>
+            <View style={styles.progressContainer}>
+              <View style={styles.progressBar}>
+                <View style={styles.progressFill} />
+              </View>
+            </View>
+          </View>
+          <Text style={styles.moduleInfo}>Booklet 2, Module 4 - Fruits</Text>
+        </View>
+
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.introContainer}>
+            <Text style={styles.introTitle}>👨‍👩‍👧‍👦 Parent & Child Activity</Text>
+            <Text style={styles.introText}>
+              This exercise works best when parent and child do it together!
+              {"\n\n"}
+              First, we'll listen to the word together. Then the parent will
+              record themselves saying it clearly, so the child can learn the
+              correct pronunciation.
+              {"\n\n"}
+              Ready to start?
+            </Text>
+            <Pressable style={styles.okButton} onPress={handleOkPress}>
+              <Text style={styles.okButtonText}>Let's Begin!</Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
+  const stepInfo = getStepInfo();
+  const canProceed =
+    currentStep === "complete" && pronunciationFeedback?.type === "success";
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Top Section */}
       <View style={styles.topSection}>
         <View style={styles.headerRow}>
           <Pressable onPress={() => router.back()}>
@@ -247,45 +861,101 @@ export default function Hw1Screen() {
         <Text style={styles.moduleInfo}>Booklet 2, Module 4 - Fruits</Text>
       </View>
 
-      {/* Instruction */}
       <View style={styles.instructionContainer}>
-        <Text style={styles.instruction}>Point and read</Text>
+        <View style={styles.instructionRow}>
+          <Image
+            source={require("../../../assets/instructions/icon-1.jpeg")}
+            style={styles.instructionIcon}
+          />
+          <Text style={styles.instruction}>{stepInfo.instruction}</Text>
+        </View>
       </View>
 
-      {/* Main Content */}
-      <View style={styles.mainContent}>
+      <ScrollView
+        style={styles.mainContent}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {renderStepIndicator()}
+
         <View style={styles.contentCard}>
-          {/* Emoji */}
           {renderEmoji()}
 
-          {/* Word */}
           <View style={styles.wordContainer}>
             <Text style={styles.word}>{currentWord}</Text>
           </View>
 
-          {/* Audio Button */}
-          <Pressable
-            style={[
-              styles.audioButton,
-              audioPressed && styles.audioButtonPressed,
-              isSpeaking && { backgroundColor: "#ff6b35" },
-            ]}
-            onPress={handleAudioPress}
-            onPressIn={() => setAudioPressed(true)}
-            onPressOut={() => setAudioPressed(false)}
-          >
-            <Ionicons
-              name={isSpeaking ? "volume-high" : "volume-high"}
-              size={36}
-              color="#fff"
-            />
-          </Pressable>
-        </View>
-      </View>
+          {currentStep !== "complete" && (
+            <View style={styles.buttonRow}>
+              <Pressable
+                style={[
+                  styles.audioButton,
+                  audioPressed && styles.audioButtonPressed,
+                  isSpeaking && { backgroundColor: "#ff6b35" },
+                ]}
+                onPress={handleAudioPress}
+                onPressIn={() => setAudioPressed(true)}
+                onPressOut={() => setAudioPressed(false)}
+              >
+                <Ionicons
+                  name={isSpeaking ? "volume-high" : "volume-high"}
+                  size={36}
+                  color="#fff"
+                />
+              </Pressable>
 
-      {/* Bottom Section */}
+              {stepInfo.showRecord && (
+                <Pressable
+                  style={[
+                    styles.recordButton,
+                    isRecording && styles.recordButtonActive,
+                    recordPressed && styles.recordButtonPressed,
+                  ]}
+                  onPress={handleRecordPress}
+                  onPressIn={() => setRecordPressed(true)}
+                  onPressOut={() => setRecordPressed(false)}
+                >
+                  <Ionicons
+                    name={isRecording ? "stop-circle" : "mic"}
+                    size={36}
+                    color="#fff"
+                  />
+                </Pressable>
+              )}
+
+              {stepInfo.showPlayback && (
+                <Pressable
+                  style={[
+                    styles.playButton,
+                    !hasRecording && styles.playButtonDisabled,
+                    isPlayingRecording && {
+                      backgroundColor: "#0056b3",
+                      transform: [{ scale: 1.05 }],
+                    },
+                  ]}
+                  onPress={playRecording}
+                  disabled={!hasRecording}
+                >
+                  <Ionicons
+                    name={isPlayingRecording ? "pause" : "play"}
+                    size={32}
+                    color="#fff"
+                  />
+                </Pressable>
+              )}
+            </View>
+          )}
+
+          {renderFeedback()}
+        </View>
+      </ScrollView>
+
       <View style={styles.bottomSection}>
-        <Pressable style={styles.nextButton} onPress={handleNext}>
+        <Pressable
+          style={[styles.nextButton, !canProceed && styles.nextButtonDisabled]}
+          onPress={handleNext}
+          disabled={!canProceed}
+        >
           <Text style={styles.nextButtonText}>Next</Text>
           <Ionicons name="arrow-forward" size={20} color="#fff" />
         </Pressable>

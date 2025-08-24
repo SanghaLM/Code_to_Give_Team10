@@ -218,10 +218,9 @@ const styles = StyleSheet.create({
   },
   submissionLabel: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#000',
     marginBottom: 15,
-    fontFamily: 'BalsamiqSans_400Regular',
   },
   textInput: {
     borderWidth: 2,
@@ -238,10 +237,9 @@ const styles = StyleSheet.create({
   },
   photoLabel: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#000',
     marginBottom: 15,
-    fontFamily: 'BalsamiqSans_400Regular',
   },
   addPhotoButton: {
     flexDirection: 'row',
@@ -258,17 +256,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#007AFF',
     marginLeft: 10,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
   },
   fileSection: {
     marginBottom: 30,
   },
   fileLabel: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: 'BalsamiqSans_700Bold',
     color: '#000',
     marginBottom: 15,
-    fontFamily: 'BalsamiqSans_400Regular',
   },
   uploadButton: {
     flexDirection: 'row',
@@ -284,7 +281,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#007AFF',
     marginLeft: 10,
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
   },
   bottomSection: {
     paddingHorizontal: 20,
@@ -303,8 +300,7 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: '600',
-    fontFamily: 'BalsamiqSans_400Regular',
+    fontFamily: 'BalsamiqSans_700Bold',
   },
   successContainer: {
     flexDirection: 'row',
