@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Alert, Pressable, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from './userContext';
+import * as api from './api';
 
 
 export default function Login() {
@@ -9,40 +10,52 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [accessCode, setAccessCode] = useState('');
   const [isCreating, setIsCreating] = useState(false);
-  const { setRole, setUsername, setIsLoggedIn } = useUser();
+  const { setRole, setUsername, setIsLoggedIn, setToken, setChildrenList, setSelectedChildId } = useUser();
 
 
   const handleLogin = async () => {
-    // Normalize username for comparison
-    const normalizedUsername = username.trim().toLowerCase();
-    // Hardcoded admin login for teacher
-    if (normalizedUsername === 'admin' && password === 'admin') {
-      setRole('teacher');
-      setUsername(username.trim());
-      setIsLoggedIn(true);
-      return;
+    // Simple hardcoded authentication for demo/demo workflow
+    const normalizedUsername = username.trim();
+    try {
+      // Teacher: username 'admin' password 'admin'
+      if (normalizedUsername === 'admin' && password === 'admin') {
+        setRole('teacher');
+        setUsername('admin');
+        setToken('local-teacher-token');
+        setIsLoggedIn(true);
+        return;
+      }
+
+      // Parent: single hardcoded account
+      if (normalizedUsername === 'sarahchen' && password === '1234') {
+        setRole('parent');
+        setUsername('sarahchen');
+        setToken('local-parent-token');
+        setIsLoggedIn(true);
+
+        // Provide a demo child for the hardcoded parent
+        const demoChild = { _id: 'local-child-1', firstName: 'Emma', lastName: 'Cheung', kindergartenLevel: 'K1', kindergartenName: 'Demo Kindergarten' };
+        setChildrenList([demoChild]);
+        setSelectedChildId(demoChild._id);
+        return;
+      }
+
+      Alert.alert('Login Failed', 'Invalid credentials. Use admin/admin for teacher or sarahchen/1234 for parent.');
+    } catch (err) {
+      console.error('Login error', err);
+      Alert.alert('Login Failed', 'Unexpected error');
     }
-    // All other logins are students (for demo)
-    if (username && password) {
-      setRole('student');
-      setUsername(username.trim());
-      setIsLoggedIn(true);
-      return;
-    }
-    Alert.alert('Login Failed', 'Please enter a valid username and password.');
   };
 
 
   const handleCreateAccount = async () => {
-    // For demo: require all fields
+    // For now we won't wire signup to backend; require fields then create locally
     if (!username || !password || !accessCode) {
       Alert.alert('Missing Fields', 'Please fill in all fields.');
       return;
     }
-    // Accept any access code for demo
-    setRole('student');
-    setUsername(username);
-    setIsLoggedIn(true);
+    // Signup flow for parent/teacher isn't implemented in-app yet. Show info.
+    Alert.alert('Signup', 'Signup via the app is not yet enabled. Please contact admin.');
   };
 
   return (

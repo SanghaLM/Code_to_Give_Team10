@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useUser } from '../userContext';
+import * as api from '../api';
 
 const styles = StyleSheet.create({
   container: {
@@ -182,6 +184,32 @@ export default function TaskScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('All');
   const [expandedBooklets, setExpandedBooklets] = useState([1]); // Booklet 2 is expanded by default
+  const { token, selectedChildId, childrenList, setSelectedChildId } = useUser();
+  const [booklets, setBooklets] = useState(null);
+
+  useEffect(() => {
+    // Fetch assigned homeworks for selected child
+    async function loadHomeworks() {
+      if (!selectedChildId || !token) return;
+      try {
+        const hw = await api.getChildrenHomeworks(selectedChildId, token);
+        // Map backend homework assignments to booklet-like structure
+        const mapped = (hw || []).map((h, idx) => ({
+          id: idx + 1,
+          homeworkId: h._id,
+          title: h.title,
+          status: '0/4 Modules Finished',
+          color1: '#E4EDF5',
+          color2: '#0340A4',
+          modules: (h.words || []).map((w) => ({ name: w.word, completed: false, dueDate: h.dueDate ? new Date(h.dueDate).toDateString() : '-' })),
+        }));
+        setBooklets(mapped);
+      } catch (err) {
+        console.warn('Failed to load homeworks', err);
+      }
+    }
+    loadHomeworks();
+  }, [selectedChildId, token]);
 
   const toggleBooklet = (bookletId) => {
     setExpandedBooklets(prev => 
@@ -191,7 +219,8 @@ export default function TaskScreen() {
     );
   };
 
-  const booklets = [
+  // Use fetched booklets if available, otherwise fallback to static booklets
+  const displayBooklets = booklets || [
     {
       id: 1,
       title: 'Booklet 1',
@@ -205,45 +234,6 @@ export default function TaskScreen() {
         { name: 'Module 4: Feelings', completed: true, points: '18/20' },
       ]
     },
-    {
-      id: 2,
-      title: 'Booklet 2',
-      status: '3/4 Modules Finished',
-      color1: '#E4EDF5',
-      color2: '#0340A4',
-      modules: [
-        { name: 'Module 1: Colors', completed: true, points: '18/20' },
-        { name: 'Module 2: Numbers', completed: true, points: '18/20' },
-        { name: 'Module 3: Family', completed: true, points: '18/20' },
-        { name: 'Module 4: Feelings', completed: false, dueDate: '9 Nov' },
-      ]
-    },
-    {
-      id: 3,
-      title: 'Booklet 3',
-      status: '0/4 Modules Finished',
-      color1: '#E1F9E9',
-      color2: '#086935',
-      modules: [
-        { name: 'Module 1: Colors', completed: false, dueDate: '-' },
-        { name: 'Module 2: Numbers', completed: false, dueDate: '-' },
-        { name: 'Module 3: Family', completed: false, dueDate: '-' },
-        { name: 'Module 4: Feelings', completed: false, dueDate: '-' },
-      ]
-    },
-    {
-      id: 4,
-      title: 'Booklet 4',
-      status: '0/4 Modules Finished',
-      color1: '#FFF7E6',
-      color2: '#E9982D',
-      modules: [
-        { name: 'Module 1: Colors', completed: false, dueDate: '-' },
-        { name: 'Module 2: Numbers', completed: false, dueDate: '-' },
-        { name: 'Module 3: Family', completed: false, dueDate: '-' },
-        { name: 'Module 4: Feelings', completed: false, dueDate: '-' },
-      ]
-    }
   ];
 
   return (
@@ -253,6 +243,27 @@ export default function TaskScreen() {
       showsVerticalScrollIndicator={false}
     >
       <Text style={styles.title}>Homework</Text>
+      {/* Child selector for parents */}
+      {childrenList && childrenList.length > 0 && (
+        <View style={{ marginBottom: 12 }}>
+          <Text style={{ marginBottom: 6 }}>Selected child:</Text>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            {childrenList.map((c) => {
+              const id = c._id || c.id;
+              const selected = selectedChildId === id;
+              return (
+                <Pressable
+                  key={id}
+                  onPress={() => setSelectedChildId(id)}
+                  style={{ padding: 8, borderRadius: 8, backgroundColor: selected ? '#000' : '#fff' }}
+                >
+                  <Text style={{ color: selected ? '#fff' : '#000' }}>{c.firstName} {c.lastName}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+      )}
       
       <View style={styles.tabContainer}>
         {['All', 'Upcoming', 'Past'].map((tab) => (
@@ -271,7 +282,7 @@ export default function TaskScreen() {
         ))}
       </View>
 
-      {booklets.map((booklet) => {
+  {displayBooklets.map((booklet) => {
         const isExpanded = expandedBooklets.includes(booklet.id);
         return (
           <View
@@ -332,7 +343,11 @@ export default function TaskScreen() {
                       {!module.completed && (
                         <Pressable
                           style={styles.submitButton}
-                          onPress={() => router.push('/tabs/homework/hw-1')}
+                          onPress={() => {
+                            // Navigate to homework flow. If homeworkId exists, pass it.
+                            if (booklet.homeworkId) router.push(`/tabs/homework/instructions?homeworkId=${booklet.homeworkId}`);
+                            else router.push('/tabs/homework/hw-1');
+                          }}
                         >
                           <Text style={styles.submitButtonText}>Submit</Text>
                         </Pressable>

@@ -1,90 +1,71 @@
 
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import NewPublicPost from './NewPublicPost';
 import PublicPosts from './PublicPosts';
 import Modal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-
-const initialPosts = [
-	{
-		id: '1',
-		username: 'Daisy',
-		avatar: 'https://randomuser.me/api/portraits/women/3.jpg',
-		text: 'Check out this funny meme! 😂',
-		image: 'https://i.imgur.com/YOe4QqF.jpg',
-		reactions: 5,
-		comments: [
-			{ id: 'c1', username: 'Eve', text: 'LOL, that made my day!' },
-		],
-		timestamp: '3h ago',
-	},
-	{
-		id: '2',
-		username: 'Frank',
-		avatar: 'https://randomuser.me/api/portraits/men/4.jpg',
-		text: 'Who wants to play chess online?',
-		image: null,
-		reactions: 2,
-		comments: [],
-		timestamp: '2h ago',
-	},
-];
+import * as api from '../../api';
+import { useUser } from '../../userContext';
 
 export default function ForFun() {
-	const [posts, setPosts] = useState(initialPosts);
+	const [posts, setPosts] = useState([]);
 	const [modalVisible, setModalVisible] = useState(false);
-	const [reactedPostIds, setReactedPostIds] = useState([]); // Track posts reacted to
+	const [reactedPostIds, setReactedPostIds] = useState([]);
+	const { username } = useUser();
 
-	const handleAddPost = (text, image) => {
-		setPosts([
-			{
-				id: Math.random().toString(),
-				username: 'You',
-				avatar: 'https://randomuser.me/api/portraits/lego/2.jpg',
-				text,
-				image: image || null,
-				reactions: 0,
-				comments: [],
-				timestamp: 'Just now',
-			},
-			...posts,
-		]);
-		setModalVisible(false);
+	const load = async () => {
+			try {
+				const res = await api.listPublicPostsByCategory('forfun');
+				setPosts(res.posts || []);
+			} catch (err) {
+			console.warn('Failed to load public posts', err);
+		}
 	};
 
-	const handleReact = postId => {
-		if (reactedPostIds.includes(postId)) return; // Prevent multiple reactions
-		setPosts(posts.map(post =>
-			post.id === postId
-				? { ...post, reactions: post.reactions + 1 }
-				: post
-		));
-		setReactedPostIds([...reactedPostIds, postId]);
+	useEffect(() => { load(); }, []);
+
+	const handleAddPost = async (text, image) => {
+			try {
+				const res = await api.createPublicPost(username || 'You', text, image, null, 'forfun');
+				setPosts(prev => [res.post, ...prev]);
+				setModalVisible(false);
+			} catch (err) {
+			console.error('Failed to create post', err);
+		}
 	};
 
-	const handleAddComment = (postId, commentText) => {
-		setPosts(posts.map(post =>
-			post.id === postId
-				? {
-						...post,
-						comments: [
-							...post.comments,
-							{
-								id: Math.random().toString(),
-								username: 'You',
-								text: commentText,
-							},
-						],
-					}
-				: post
-		));
+	const handleReact = async (postId) => {
+		if (reactedPostIds.includes(postId)) return;
+		try {
+			const res = await api.request(`/public/posts/${postId}/react`, { method: 'POST' });
+			setPosts(prev => prev.map(p => p.id === res.post.id ? res.post : p));
+			setReactedPostIds(prev => [...prev, postId]);
+		} catch (err) {
+			console.warn('React failed', err);
+		}
+	};
+
+	const handleAddComment = async (postId, commentText) => {
+		try {
+			const res = await api.request(`/public/posts/${postId}/comment`, { method: 'POST', body: JSON.stringify({ username: username || 'You', text: commentText }) });
+			setPosts(prev => prev.map(p => p.id === res.post.id ? res.post : p));
+		} catch (err) {
+			console.warn('Add comment failed', err);
+		}
+	};
+
+	const handleReport = async (postId) => {
+		try {
+			await api.request(`/public/posts/${postId}/report`, { method: 'POST' });
+		} catch (err) {
+			console.warn('Report failed', err);
+		}
 	};
 
 	return (
 		<View style={styles.container}>
-			<PublicPosts posts={posts} onReact={handleReact} onAddComment={handleAddComment} />
+			<PublicPosts posts={posts} onReact={handleReact} onAddComment={handleAddComment} onReport={handleReport} />
 			<TouchableOpacity
 				style={styles.fab}
 				onPress={() => setModalVisible(true)}

@@ -1,34 +1,43 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, Pressable, Image, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-
-// Hardcoded reported posts data
-const REPORTED_POSTS = [
-  {
-    id: 'p1',
-    username: 'Daisy',
-    avatar: 'https://randomuser.me/api/portraits/women/3.jpg',
-    text: 'Check out this funny meme! 😂',
-    image: 'https://i.imgur.com/YOe4QqF.jpg',
-    reason: 'Inappropriate image',
-  },
-  {
-    id: 'p2',
-    username: 'Frank',
-    avatar: 'https://randomuser.me/api/portraits/men/4.jpg',
-    text: 'Who wants to play chess online?',
-    image: null,
-    reason: 'Spam',
-  },
-];
+import * as api from '../tabs/communityTabs/../../api';
+import { useUser } from '../userContext';
 
 export default function ReportsPage() {
   const router = useRouter();
-  const [posts, setPosts] = useState(REPORTED_POSTS);
+  const { token } = useUser();
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleAction = (id, action) => {
-    setPosts(posts.filter(post => post.id !== id));
-    // In a real app, send action to backend
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await api.request('/public/posts?reported=true', { method: 'GET' }, token);
+      const items = (res.posts || []).map(p => ({ ...p, id: p.id || p._id }));
+      setPosts(items);
+    } catch (err) {
+      console.warn('Failed to load reported posts', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const handleAction = async (id, action) => {
+    try {
+      if (action === 'takedown') {
+        await api.request(`/public/posts/${id}`, { method: 'DELETE' }, token);
+        setPosts(prev => prev.filter(p => String(p.id) !== String(id)));
+      } else if (action === 'ignore') {
+        await api.request(`/public/posts/${id}/unreport`, { method: 'PATCH' }, token);
+        setPosts(prev => prev.filter(p => String(p.id) !== String(id)));
+      }
+    } catch (err) {
+      console.warn('Moderation action failed', err);
+      Alert.alert('Error', 'Action failed.');
+    }
   };
 
   return (
@@ -43,10 +52,10 @@ export default function ReportsPage() {
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.headerRow}>
-              <Image source={{ uri: item.avatar }} style={styles.avatar} />
+              <Image source={{ uri: item.avatar || 'https://randomuser.me/api/portraits/lego/1.jpg' }} style={styles.avatar} />
               <View style={{ flex: 1 }}>
-                <Text style={styles.username}>{item.username}</Text>
-                <Text style={styles.reason}>Reason: {item.reason}</Text>
+                <Text style={styles.username}>{item.author || item.username || 'Unknown'}</Text>
+                <Text style={styles.reason}>Reason: {item.reason || 'Reported'}</Text>
               </View>
             </View>
             <Text style={styles.text}>{item.text}</Text>
@@ -63,7 +72,7 @@ export default function ReportsPage() {
             </View>
           </View>
         )}
-        ListEmptyComponent={<Text style={{ color: '#888', marginTop: 24, textAlign: 'center' }}>No reported posts.</Text>}
+        ListEmptyComponent={<Text style={{ color: '#888', marginTop: 24, textAlign: 'center' }}>{loading ? 'Loading...' : 'No reported posts.'}</Text>}
         contentContainerStyle={{ paddingBottom: 24 }}
       />
     </View>
