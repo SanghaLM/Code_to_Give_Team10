@@ -43,6 +43,16 @@ router.get(
   authMiddleware,
   teacherController.getSubmissions
 );
+router.get(
+  "/homework/:homeworkId/metrics",
+  authMiddleware,
+  teacherController.getHomeworkMetrics
+);
+router.get(
+  "/homework/:homeworkId/metrics",
+  authMiddleware,
+  teacherController.getHomeworkMetrics
+);
 router.post(
   "/submission/:id/feedback",
   authMiddleware,
@@ -62,5 +72,7 @@ router.get(
   teacherController.getStudentProgress
 );
 router.post("/students", authMiddleware, teacherController.addStudent); // Added
+// Moderation
+router.delete('/posts/:postId', authMiddleware, teacherController.deletePublicPost);
 
 module.exports = router;

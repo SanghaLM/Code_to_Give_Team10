@@ -43,6 +43,11 @@ router.post(
   authMiddleware,
   parentController.submitHomework
 );
+router.post(
+  "/homework/:homeworkId/reset",
+  authMiddleware,
+  parentController.resetHomework
+);
 router.get(
   "/homework/:homeworkId/metrics",
   authMiddleware,

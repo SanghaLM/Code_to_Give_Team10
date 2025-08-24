@@ -463,6 +463,59 @@ exports.getSubmissionByHomework = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.resetHomework = async (req, res) => {
+  console.log('resetHomework request:', req.params, 'for user:', req.user.id);
+  try {
+    const { homeworkId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(homeworkId)) {
+      return res.status(400).json({ message: 'Invalid homework ID' });
+    }
+
+    // Find any submission for this parent and homework and remove recordings / reset status
+    let submission = await Submission.findOne({ homeworkId, parentId: req.user.id });
+    if (!submission) {
+      return res.status(404).json({ message: 'No submission found to reset' });
+    }
+
+    submission.recordings = [];
+    submission.status = 'pending';
+    submission.timeTakenSeconds = null;
+    submission.completedAt = null;
+    await submission.save();
+
+    console.log('Homework reset for submission:', submission._id);
+    res.json({ message: 'Homework reset', submission });
+  } catch (err) {
+    console.error('Error in resetHomework:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Reset or delete a submission so a child can re-do the homework
+exports.resetHomework = async (req, res) => {
+  console.log('resetHomework request:', req.params, 'body:', req.body, 'user:', req.user.id);
+  try {
+    const { homeworkId } = req.params;
+    const { studentId } = req.body;
+    const parentId = req.user.id;
+
+    if (!mongoose.Types.ObjectId.isValid(homeworkId) || !mongoose.Types.ObjectId.isValid(studentId)) {
+      return res.status(400).json({ message: 'Invalid ID' });
+    }
+
+    const submission = await Submission.findOneAndDelete({ homeworkId, studentId, parentId });
+    if (!submission) {
+      return res.status(404).json({ message: 'No submission found to reset' });
+    }
+
+    console.log('Submission reset (deleted):', submission._id);
+    res.json({ message: 'Submission reset', deleted: true });
+  } catch (err) {
+    console.error('Error in resetHomework:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
 exports.requestTeacher = async (req, res) => {
   console.log("requestTeacher request:", req.params, req.body);
   try {

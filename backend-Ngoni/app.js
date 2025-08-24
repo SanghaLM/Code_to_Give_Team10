@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const parentRoutes = require("./routes/parentRoutes");
 const teacherRoutes = require("./routes/teacherRoutes"); // Added
+const publicRoutes = require("./routes/publicRoutes");
 
 const cors = require("cors");
 const { cleanupUploads } = require("./utils/cleanup"); // From earlier
@@ -32,6 +33,8 @@ console.log("Middleware configured: CORS, body-parser, static uploads");
 app.use("/api/parents", parentRoutes);
 console.log("Parent routes registered");
 app.use("/api/teachers", teacherRoutes); // Added
+app.use('/api/public', publicRoutes);
+console.log('Public routes registered');
 
 app.get("/", (req, res) => {
   console.log("Root endpoint accessed");

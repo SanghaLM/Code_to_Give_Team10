@@ -248,6 +248,52 @@ exports.getSubmissions = async (req, res) => {
   }
 };
 
+// Teacher: get metrics for a specific homework (wraps parentController logic)
+exports.getHomeworkMetrics = async (req, res) => {
+  console.log('teacher getHomeworkMetrics request:', req.params);
+  try {
+    const homeworkId = req.params.homeworkId;
+    if (!mongoose.Types.ObjectId.isValid(homeworkId)) return res.status(400).json({ message: 'Invalid homework ID' });
+    const submissions = await Submission.find({ homeworkId });
+    const totalSubmissions = submissions.length;
+    const completedSubmissions = submissions.filter(s => s.status === 'completed').length;
+    const parentParticipation = submissions.filter(s => s.recordings.some(r => r.parentAudioUrl)).length;
+    const avgScore = submissions.reduce((sum, s) => sum + (s.recordings.reduce((s2, r) => s2 + (r.parentScore || r.childScore || 0), 0) / (s.recordings.length || 1)), 0) / (totalSubmissions || 1);
+    const metrics = {
+      totalSubmissions,
+      completedSubmissions,
+      completionRate: totalSubmissions > 0 ? ((completedSubmissions / totalSubmissions) * 100).toFixed(2) : '0.00',
+      parentParticipationRate: totalSubmissions > 0 ? ((parentParticipation / totalSubmissions) * 100).toFixed(2) : '0.00',
+      averageScore: (avgScore || 0).toFixed(2)
+    };
+    res.json(metrics);
+  } catch (err) {
+    console.error('Error in teacher getHomeworkMetrics', err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Teacher: remove a public post (moderation)
+exports.deletePublicPost = async (req, res) => {
+  console.log('deletePublicPost request:', req.params, req.body);
+  try {
+    const { postId } = req.params;
+    // Our public posts are in-memory POSTS in publicController; for now emit an event to remove
+    // For simplicity, call into the public posts array via require cache
+    const publicController = require('../controllers/publicController');
+    if (!publicController || !publicController.POSTS) {
+      return res.status(500).json({ message: 'Public posts not available for deletion' });
+    }
+    const idx = publicController.POSTS.findIndex(p => String(p.id) === String(postId));
+    if (idx === -1) return res.status(404).json({ message: 'Post not found' });
+    const removed = publicController.POSTS.splice(idx, 1);
+    res.json({ message: 'Post removed', post: removed[0] });
+  } catch (err) {
+    console.error('Error in deletePublicPost', err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.provideFeedback = async (req, res) => {
   console.log(
     "provideFeedback request: ",
@@ -440,6 +486,42 @@ exports.getPendingStudents = async (req, res) => {
     res.json({ pendingStudents: children });
   } catch (err) {
     console.error("Error in getPendingStudents:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getHomeworkMetrics = async (req, res) => {
+  console.log('getHomeworkMetrics (teacher) request:', req.params, 'for user:', req.user.id);
+  try {
+    const { homeworkId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(homeworkId)) {
+      return res.status(400).json({ message: 'Invalid homework ID' });
+    }
+
+    const homework = await Homework.findById(homeworkId);
+    if (!homework) {
+      return res.status(400).json({ message: 'Invalid homework ID' });
+    }
+
+    const submissions = await Submission.find({ homeworkId });
+    const totalSubmissions = submissions.length;
+    const completedSubmissions = submissions.filter(s => s.status === 'completed').length;
+    const parentParticipation = submissions.filter(s => s.recordings.some(r => r.parentAudioUrl)).length;
+
+    const avgScore = submissions.reduce((sum, s) => sum + (s.recordings.reduce((s2, r) => s2 + (r.parentScore || r.childScore || 0), 0) / (s.recordings.length || 1)), 0) / (totalSubmissions || 1);
+
+    const metrics = {
+      totalSubmissions,
+      completedSubmissions,
+      completionRate: totalSubmissions > 0 ? ((completedSubmissions / totalSubmissions) * 100).toFixed(2) : '0.00',
+      parentParticipationRate: totalSubmissions > 0 ? ((parentParticipation / totalSubmissions) * 100).toFixed(2) : '0.00',
+      averageScore: (avgScore || 0).toFixed(2),
+    };
+
+    console.log('Teacher homework metrics:', metrics);
+    res.json(metrics);
+  } catch (err) {
+    console.error('Error in getHomeworkMetrics (teacher):', err.message);
     res.status(500).json({ error: err.message });
   }
 };
