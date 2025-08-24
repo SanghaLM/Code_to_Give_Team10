@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   Animated,
   ScrollView,
+  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -226,7 +227,13 @@ export default function Hw2Screen() {
 
       {/* Instruction */}
       <View style={styles.instructionContainer}>
-        <Text style={styles.instruction}>Match the animal to the word</Text>
+        <View style={styles.instructionRow}>
+          <Image 
+            source={require('../../../assets/instructions/icon-3.jpeg')} 
+            style={styles.instructionIcon} 
+          />
+          <Text style={styles.instruction}>Match the animal to the word</Text>
+        </View>
       </View>
 
       {/* Main Content - Scrollable */}
@@ -476,12 +483,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 30,
   },
+  instructionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 15,
+  },
+  instructionIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
   instruction: {
-    fontSize: 28,
-    fontWeight: "bold",
+    fontSize: 24,
+    fontFamily: "BalsamiqSans_700Bold",
     color: "#000",
-    textAlign: "center",
-    fontFamily: "BalsamiqSans_400Regular",
+    textAlign: "left",
+    flex: 1,
   },
   scrollContainer: {
     flex: 1,
