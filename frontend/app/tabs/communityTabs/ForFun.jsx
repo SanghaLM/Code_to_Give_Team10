@@ -1,11 +1,59 @@
 
 
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Modal, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import NewPublicPost from './NewPublicPost';
 import PublicPosts from './PublicPosts';
-import Modal from 'react-native-modal';
+import RNModal from 'react-native-modal';
+
+// Chat Rules Popup Component
+const ChatRulesPopup = ({ visible, onClose }) => {
+  const chatRules = [
+    "Be respectful and kind to everyone",
+    "No bullying, harassment, or hate speech",
+    "Keep conversations appropriate for all ages",
+    "No sharing personal information",
+    "Report any concerning behavior to teachers",
+    "Stay on topic and relevant to the community"
+  ];
+
+  return (
+    <RNModal
+      visible={visible}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <View style={styles.rulesPopupOverlay}>
+        <View style={styles.rulesPopupContainer}>
+          <View style={styles.rulesPopupHeader}>
+            <View style={styles.rulesPopupTitleContainer}>
+              <Ionicons name="warning" size={20} color="#8B4513" style={{ marginRight: 8 }} />
+              <Text style={styles.rulesPopupTitle}>Chat Rules</Text>
+            </View>
+            <TouchableOpacity onPress={onClose} style={styles.rulesCloseButton}>
+              <Ionicons name="close" size={24} color="#8B4513" />
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.rulesPopupContent}>
+            {chatRules.map((rule, index) => (
+              <View key={index} style={styles.rulesPopupRuleItem}>
+                <Text style={styles.rulesPopupRuleNumber}>{index + 1}.</Text>
+                <Text style={styles.rulesPopupRuleText}>{rule}</Text>
+              </View>
+            ))}
+          </View>
+          
+          <TouchableOpacity style={styles.rulesAcknowledgeButton} onPress={onClose}>
+            <Text style={styles.rulesAcknowledgeButtonText}>I Understand</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </RNModal>
+  );
+};
 
 const initialPosts = [
 	{
@@ -35,6 +83,7 @@ const initialPosts = [
 export default function ForFun() {
 	const [posts, setPosts] = useState(initialPosts);
 	const [modalVisible, setModalVisible] = useState(false);
+	const [rulesModalVisible, setRulesModalVisible] = useState(false);
 	const [reactedPostIds, setReactedPostIds] = useState([]); // Track posts reacted to
 
 	const handleAddPost = (text, image) => {
@@ -82,17 +131,29 @@ export default function ForFun() {
 		));
 	};
 
+	const handleFabPress = () => {
+		// Show rules first, then post modal after acknowledgment
+		setRulesModalVisible(true);
+	};
+
+	const handleRulesClose = () => {
+		setRulesModalVisible(false);
+		// Show post creation modal after rules are acknowledged
+		setModalVisible(true);
+	};
+
 	return (
 		<View style={styles.container}>
 			<PublicPosts posts={posts} onReact={handleReact} onAddComment={handleAddComment} />
-			<TouchableOpacity
-				style={styles.fab}
-				onPress={() => setModalVisible(true)}
-				activeOpacity={0.8}
-			>
-				<Ionicons name="add" size={28} color="#fff" />
-			</TouchableOpacity>
-			<Modal
+			
+			{/* Chat Rules Popup - Shows First */}
+			<ChatRulesPopup 
+				visible={rulesModalVisible} 
+				onClose={handleRulesClose} 
+			/>
+			
+			{/* Post Creation Modal - Shows After Rules */}
+			<RNModal
 				isVisible={modalVisible}
 				onBackdropPress={() => setModalVisible(false)}
 				style={styles.modal}
@@ -101,7 +162,15 @@ export default function ForFun() {
 				<View style={styles.modalContent}>
 					<NewPublicPost onAddPost={handleAddPost} />
 				</View>
-			</Modal>
+			</RNModal>
+			
+			<TouchableOpacity
+				style={styles.fab}
+				onPress={handleFabPress}
+				activeOpacity={0.8}
+			>
+				<Ionicons name="add" size={28} color="#fff" />
+			</TouchableOpacity>
 		</View>
 	);
 }
@@ -156,5 +225,78 @@ const styles = StyleSheet.create({
 		textAlign: 'center',
 		paddingVertical: 8,
 		fontFamily: 'BalsamiqSans_400Regular',
+	},
+	rulesPopupOverlay: {
+		flex: 1,
+		backgroundColor: 'rgba(0,0,0,0.5)',
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	rulesPopupContainer: {
+		backgroundColor: '#fff',
+		borderRadius: 16,
+		padding: 24,
+		width: '80%',
+		alignItems: 'center',
+		shadowColor: '#c7c7c7ff',
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.15,
+		shadowRadius: 8,
+		elevation: 8,
+	},
+	rulesPopupHeader: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		width: '100%',
+		marginBottom: 16,
+	},
+	rulesPopupTitleContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
+	rulesPopupTitle: {
+		fontSize: 20,
+		fontWeight: 'bold',
+		color: '#8B4513',
+		fontFamily: 'BalsamiqSans_700Bold',
+	},
+	rulesCloseButton: {
+		padding: 8,
+	},
+	rulesPopupContent: {
+		width: '100%',
+		marginBottom: 20,
+	},
+	rulesPopupRuleItem: {
+		flexDirection: 'row',
+		alignItems: 'flex-start',
+		marginBottom: 10,
+	},
+	rulesPopupRuleNumber: {
+		fontSize: 18,
+		fontWeight: 'bold',
+		color: '#F7941F',
+		marginRight: 10,
+		fontFamily: 'BalsamiqSans_700Bold',
+	},
+	rulesPopupRuleText: {
+		fontSize: 16,
+		color: '#333',
+		fontFamily: 'BalsamiqSans_400Regular',
+	},
+	rulesAcknowledgeButton: {
+		backgroundColor: '#F7941F',
+		paddingVertical: 12,
+		paddingHorizontal: 25,
+		borderRadius: 10,
+		width: '100%',
+	},
+	rulesAcknowledgeButtonText: {
+		color: '#fff',
+		fontSize: 18,
+		fontWeight: 'bold',
+		textAlign: 'center',
+		fontFamily: 'BalsamiqSans_700Bold',
 	},
 });

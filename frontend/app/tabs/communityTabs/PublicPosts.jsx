@@ -1,11 +1,62 @@
 
 import React, { useState, useRef } from 'react';
 import { View, Text, Image, TextInput, Button, TouchableOpacity, StyleSheet, FlatList, Modal, Pressable, Platform, ToastAndroid, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+// Chat Rules Popup Component
+const ChatRulesPopup = ({ visible, onClose }) => {
+  const chatRules = [
+    "Be respectful and kind to everyone",
+    "No bullying, harassment, or hate speech",
+    "Keep conversations appropriate for all ages",
+    "No sharing personal information",
+    "Report any concerning behavior to teachers",
+    "Stay on topic and relevant to the community"
+  ];
+
+  return (
+    <Modal
+      visible={visible}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <View style={styles.popupOverlay}>
+        <View style={styles.popupContainer}>
+          <View style={styles.popupHeader}>
+            <View style={styles.popupTitleContainer}>
+              <Ionicons name="warning" size={20} color="#8B4513" style={{ marginRight: 8 }} />
+              <Text style={styles.popupTitle}>Chat Rules</Text>
+            </View>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Ionicons name="close" size={24} color="#8B4513" />
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.popupContent}>
+            {chatRules.map((rule, index) => (
+              <View key={index} style={styles.popupRuleItem}>
+                <Text style={styles.popupRuleNumber}>{index + 1}.</Text>
+                <Text style={styles.popupRuleText}>{rule}</Text>
+              </View>
+            ))}
+          </View>
+          
+          <TouchableOpacity style={styles.acknowledgeButton} onPress={onClose}>
+            <Text style={styles.acknowledgeButtonText}>I Understand</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
 function Post({ post, onReact, onAddComment }) {
 	const [comment, setComment] = useState('');
 	const [menuVisible, setMenuVisible] = useState(false);
 	const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+	const [showRules, setShowRules] = useState(false);
+	const [hasShownRules, setHasShownRules] = useState(false);
 	const menuButtonRef = useRef();
 
 	const showMenu = () => {
@@ -30,8 +81,34 @@ function Post({ post, onReact, onAddComment }) {
 		}, 300);
 	};
 
+	const handleCommentSubmit = () => {
+		if (comment.trim()) {
+			if (!hasShownRules) {
+				setShowRules(true);
+				setHasShownRules(true);
+			} else {
+				onAddComment(comment);
+				setComment('');
+			}
+		}
+	};
+
+	const handleRulesClose = () => {
+		setShowRules(false);
+		// After closing rules, submit the comment
+		if (comment.trim()) {
+			onAddComment(comment);
+			setComment('');
+		}
+	};
+
 	return (
 		<View style={styles.postContainer}>
+			<ChatRulesPopup 
+				visible={showRules} 
+				onClose={handleRulesClose} 
+			/>
+			
 			<View style={styles.header}>
 				<Image source={{ uri: post.avatar }} style={styles.avatar} />
 				<View style={{ flex: 1 }}>
@@ -85,12 +162,7 @@ function Post({ post, onReact, onAddComment }) {
 					/>
 					<Button
 						title="Post"
-						onPress={() => {
-							if (comment.trim()) {
-								onAddComment(comment);
-								setComment('');
-							}
-						}}
+						onPress={handleCommentSubmit}
 					/>
 				</View>
 			</View>
@@ -225,5 +297,73 @@ const styles = StyleSheet.create({
 		backgroundColor: '#f8f9fa',
 		fontSize: 14,
 		fontFamily: 'BalsamiqSans_400Regular',
+	},
+	// New styles for Chat Rules Popup
+	popupOverlay: {
+		flex: 1,
+		backgroundColor: 'rgba(0,0,0,0.5)',
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	popupContainer: {
+		backgroundColor: '#fff',
+		borderRadius: 16,
+		width: '90%',
+		maxWidth: 400,
+		overflow: 'hidden',
+	},
+	popupHeader: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		padding: 16,
+		borderBottomWidth: 1,
+		borderBottomColor: '#f0f0f0',
+	},
+	popupTitleContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
+	popupTitle: {
+		fontSize: 20,
+		fontFamily: 'BalsamiqSans_700Bold',
+		color: '#000',
+	},
+	closeButton: {
+		padding: 8,
+	},
+	popupContent: {
+		padding: 16,
+	},
+	popupRuleItem: {
+		flexDirection: 'row',
+		alignItems: 'flex-start',
+		marginBottom: 12,
+	},
+	popupRuleNumber: {
+		fontSize: 18,
+		fontFamily: 'BalsamiqSans_700Bold',
+		color: '#ef4444',
+		marginRight: 12,
+	},
+	popupRuleText: {
+		fontSize: 15,
+		fontFamily: 'BalsamiqSans_400Regular',
+		color: '#333',
+		lineHeight: 22,
+	},
+	acknowledgeButton: {
+		backgroundColor: '#ef4444',
+		paddingVertical: 14,
+		paddingHorizontal: 24,
+		borderRadius: 12,
+		alignItems: 'center',
+		marginHorizontal: 16,
+		marginBottom: 16,
+	},
+	acknowledgeButtonText: {
+		color: '#fff',
+		fontSize: 18,
+		fontFamily: 'BalsamiqSans_700Bold',
 	},
 });

@@ -1,24 +1,106 @@
 import React, { useState } from "react";
-import { Dimensions, View, StyleSheet, Text } from "react-native";
+import { Dimensions, View, StyleSheet, Text, TouchableOpacity, Animated } from "react-native";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
+import { Ionicons } from '@expo/vector-icons';
 import ForFun from "./communityTabs/ForFun";
 import HomeworkHelp from "./communityTabs/HomeworkHelp";
 import MessageTeacher from "./communityTabs/MessageTeacherRoute"; // The WhatsApp-like chat
+
 const initialLayout = { width: Dimensions.get("window").width };
+
+// Chat Rules Component
+const ChatRules = ({ isExpanded, onToggle, rules }) => {
+  const [animation] = useState(new Animated.Value(0));
+
+  React.useEffect(() => {
+    Animated.timing(animation, {
+      toValue: isExpanded ? 1 : 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  }, [isExpanded]);
+
+  const maxHeight = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 200],
+  });
+
+  return (
+    <View style={styles.rulesContainer}>
+      <TouchableOpacity style={styles.rulesHeader} onPress={onToggle}>
+        <View style={styles.rulesTitle}>
+          <Ionicons name="warning" size={18} color="#8B4513" style={{ marginRight: 8 }} />
+          <Text style={styles.rulesTitleText}>Chat Rules</Text>
+        </View>
+        <Ionicons 
+          name={isExpanded ? 'chevron-up' : 'chevron-down'} 
+          size={20} 
+          color="#8B4513" 
+        />
+      </TouchableOpacity>
+      
+      <Animated.View style={[styles.rulesContent, { maxHeight }]}>
+        <View style={styles.rulesList}>
+          {rules.map((rule, index) => (
+            <View key={index} style={styles.ruleItem}>
+              <Text style={styles.ruleNumber}>{index + 1}.</Text>
+              <Text style={styles.ruleText}>{rule}</Text>
+            </View>
+          ))}
+        </View>
+      </Animated.View>
+    </View>
+  );
+};
 
 export default function CommunityScreen() {
   const [index, setIndex] = useState(0);
+  const [rulesExpanded, setRulesExpanded] = useState(false);
   const [routes] = useState([
     { key: "forfun", title: "For Fun" },
     { key: "homework", title: "Homework Help" },
     { key: "teacher", title: "Message a Teacher" },
   ]);
 
-  const renderScene = SceneMap({
-    forfun: ForFun,
-    homework: HomeworkHelp,
-    teacher: MessageTeacher,
-  });
+  const chatRules = [
+    "Be respectful and kind to everyone",
+    "No bullying, harassment, or hate speech",
+    "Keep conversations appropriate for all ages",
+    "No sharing personal information",
+    "Report any concerning behavior to teachers",
+    "Stay on topic and relevant to the community"
+  ];
+
+  const renderScene = ({ route }) => {
+    switch (route.key) {
+      case 'forfun':
+        return (
+          <View style={styles.sceneContainer}>
+            <ChatRules 
+              isExpanded={rulesExpanded} 
+              onToggle={() => setRulesExpanded(!rulesExpanded)}
+              rules={chatRules}
+            />
+            <ForFun />
+          </View>
+        );
+      case 'homework':
+        return (
+          <View style={styles.sceneContainer}>
+            <ChatRules 
+              isExpanded={rulesExpanded} 
+              onToggle={() => setRulesExpanded(!rulesExpanded)}
+              rules={chatRules}
+            />
+            <HomeworkHelp />
+          </View>
+        );
+      case 'teacher':
+        return <MessageTeacher />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -92,5 +174,58 @@ const styles = StyleSheet.create({
   tabStyle: {
     paddingVertical: 12,
     paddingHorizontal: 8,
+  },
+  sceneContainer: {
+    flex: 1,
+  },
+  rulesContainer: {
+    backgroundColor: '#FFF8DC',
+    borderRadius: 12,
+    marginHorizontal: '5%',
+    marginBottom: 10,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#FFD700',
+  },
+  rulesHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    backgroundColor: '#FFE4B5',
+  },
+  rulesTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  rulesTitleText: {
+    fontFamily: 'BalsamiqSans_700Bold',
+    fontSize: 16,
+    color: '#8B4513',
+  },
+  rulesContent: {
+    paddingHorizontal: 15,
+    paddingBottom: 10,
+  },
+  rulesList: {
+    // No specific styles for the list, it will be handled by ruleItem
+  },
+  ruleItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  ruleNumber: {
+    fontFamily: 'BalsamiqSans_700Bold',
+    fontSize: 14,
+    color: '#FF6B35',
+    marginRight: 8,
+  },
+  ruleText: {
+    fontFamily: 'BalsamiqSans_400Regular',
+    fontSize: 14,
+    color: '#8B4513',
+    flexShrink: 1,
   },
 });
