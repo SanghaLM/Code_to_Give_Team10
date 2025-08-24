@@ -3,10 +3,13 @@ import { View, Text, StyleSheet, Pressable, SafeAreaView, ScrollView, Image } fr
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { fontFamily } from '../../fonts';
+import * as api from '../../api';
+import { useUser } from '../../userContext';
 
 
 export default function InstructionsScreen() {
   const router = useRouter();
+  const { token, selectedChildId } = useUser();
   
   // Get module info from route params or use default
   const moduleInfo = router.params?.moduleInfo || 'Booklet 2, Module 4 - Fruits';
@@ -17,6 +20,21 @@ export default function InstructionsScreen() {
       pathname: '/tabs/homework/hw-1',
       params: { moduleInfo }
     });
+  };
+
+  const handleResetHomework = async () => {
+    const homeworkId = router.params?.homeworkId;
+    if (!homeworkId || !selectedChildId || !token) {
+      Alert.alert('Cannot reset', 'Homework id or child not selected');
+      return;
+    }
+    try {
+      await api.resetHomework(homeworkId, selectedChildId, token);
+      Alert.alert('Reset', 'Homework reset. You can re-do the exercises.');
+    } catch (err) {
+      console.error('Reset failed', err);
+      Alert.alert('Reset failed', String(err?.message || err));
+    }
   };
 
   const handleBack = () => {

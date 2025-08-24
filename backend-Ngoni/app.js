@@ -4,8 +4,10 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const parentRoutes = require("./routes/parentRoutes");
 const teacherRoutes = require("./routes/teacherRoutes"); // Added
+
 const path = require("path");
 const fs = require("fs");
+const publicRoutes = require("./routes/publicRoutes");
 
 const cors = require("cors");
 const { cleanupUploads } = require("./utils/cleanup"); // From earlier
@@ -77,6 +79,8 @@ app.use((error, req, res, next) => {
 app.use("/api/parents", parentRoutes);
 console.log("Parent routes registered");
 app.use("/api/teachers", teacherRoutes); // Added
+app.use("/api/public", publicRoutes);
+console.log("Public routes registered");
 
 app.get("/", (req, res) => {
   console.log("Root endpoint accessed");
@@ -108,7 +112,6 @@ mongoose
     console.error("MongoDB connection error:", err.message);
   });
 
-// Cleanup old uploads daily at 2 AM
 if (cleanupUploads) {
   cron.schedule("0 2 * * *", () => {
     console.log("Running cleanup of old uploads...");

@@ -1,11 +1,12 @@
 
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import NewPublicPost from './NewPublicPost';
 import PublicPosts from './PublicPosts';
 import Modal from 'react-native-modal';
+import * as api from '../../api';
+import { useUser } from '../../userContext';
 
 const initialPosts = [
 	{
@@ -24,7 +25,7 @@ const initialPosts = [
 		id: '2',
 		username: 'Frank',
 		avatar: 'https://randomuser.me/api/portraits/men/4.jpg',
-		text: 'Who wants to play chess online?',
+		text: 'Who wants to play chess online? I bet I\'m better than everyone at it.',
 		image: null,
 		reactions: 2,
 		comments: [],
@@ -33,58 +34,87 @@ const initialPosts = [
 ];
 
 export default function ForFun() {
+	// show a small set of hardcoded posts immediately as a fallback / demo
 	const [posts, setPosts] = useState(initialPosts);
 	const [modalVisible, setModalVisible] = useState(false);
-	const [reactedPostIds, setReactedPostIds] = useState([]); // Track posts reacted to
+	const [reactedPostIds, setReactedPostIds] = useState([]);
+	const { username } = useUser();
 
-	const handleAddPost = (text, image) => {
-		setPosts([
-			{
-				id: Math.random().toString(),
-				username: 'You',
-				avatar: 'https://randomuser.me/api/portraits/lego/2.jpg',
-				text,
-				image: image || null,
-				reactions: 0,
-				comments: [],
-				timestamp: 'Just now',
-			},
-			...posts,
-		]);
-		setModalVisible(false);
+	const load = async () => {
+			try {
+				const res = await api.listPublicPostsByCategory('forfun');
+				// only replace local hardcoded posts when server returns items
+				if (res && Array.isArray(res.posts) && res.posts.length > 0) {
+					setPosts(res.posts);
+				}
+			} catch (err) {
+				console.warn('Failed to load public posts', err);
+			}
 	};
 
-	const handleReact = postId => {
-		if (reactedPostIds.includes(postId)) return; // Prevent multiple reactions
-		setPosts(posts.map(post =>
-			post.id === postId
-				? { ...post, reactions: post.reactions + 1 }
-				: post
-		));
-		setReactedPostIds([...reactedPostIds, postId]);
+	useEffect(() => { load(); }, []);
+
+	const handleAddPost = async (text, image) => {
+			try {
+				// pass username/avatar so server can persist display info
+				const sendUsername = (username || '').toLowerCase() === 'sarahchen' ? 'Sarah Chen' : (username || 'You');
+				const sendAvatar = (username || '').toLowerCase() === 'sarahchen' ? 'https://randomuser.me/api/portraits/women/65.jpg' : undefined;
+				const res = await api.createPublicPost(username || 'sarahchen', text, image, null, 'forfun', sendUsername, sendAvatar);
+				// Augment the returned post so the feed has username and avatar fields the UI expects.
+				let newPost = res.post || {};
+				if ((username || '').toLowerCase() === 'sarahchen') {
+					newPost = {
+						...newPost,
+						username: 'Sarah Chen',
+						avatar: 'https://randomuser.me/api/portraits/women/65.jpg',
+					};
+				} else {
+					newPost = { ...newPost, username: newPost.author || username || 'You' };
+				}
+				setPosts(prev => [newPost, ...prev]);
+				setModalVisible(false);
+			} catch (err) {
+			console.error('Failed to create post', err);
+		}
 	};
 
-	const handleAddComment = (postId, commentText) => {
-		setPosts(posts.map(post =>
-			post.id === postId
-				? {
-						...post,
-						comments: [
-							...post.comments,
-							{
-								id: Math.random().toString(),
-								username: 'You',
-								text: commentText,
-							},
-						],
-					}
-				: post
-		));
+	const handleReact = async (postId) => {
+		// normalize id to string to avoid mismatches between `id` and `_id`
+		const idStr = String(postId);
+		if (reactedPostIds.includes(idStr)) return;
+		try {
+			const res = await api.request(`/public/posts/${postId}/react`, { method: 'POST' });
+			const updatedPost = (res && res.post) ? res.post : res;
+			setPosts(prev => prev.map(p => (String(p.id || p._id) === String(updatedPost.id || updatedPost._id) ? updatedPost : p)));
+			setReactedPostIds(prev => [...prev, idStr]);
+		} catch (err) {
+			console.warn('React failed', err);
+		}
+	};
+
+	const handleAddComment = async (postId, commentText) => {
+		try {
+			const res = await api.request(`/public/posts/${postId}/comment`, { method: 'POST', body: JSON.stringify({ username: username || 'You', text: commentText }) });
+			const updatedPost = (res && res.post) ? res.post : res;
+			setPosts(prev => prev.map(p => (String(p.id || p._id) === String(updatedPost.id || updatedPost._id) ? updatedPost : p)));
+		} catch (err) {
+			console.warn('Add comment failed', err);
+		}
+	};
+
+	const handleReport = async (postId) => {
+		try {
+			await api.request(`/public/posts/${postId}/report`, { method: 'POST' });
+			// Remove reported post from local feed to match HomeworkHelp behavior
+			setPosts(prev => prev.filter(p => String(p.id || p._id) !== String(postId)));
+		} catch (err) {
+			console.warn('Report failed', err);
+		}
 	};
 
 	return (
 		<View style={styles.container}>
-			<PublicPosts posts={posts} onReact={handleReact} onAddComment={handleAddComment} />
+			<PublicPosts posts={posts} onReact={handleReact} onAddComment={handleAddComment} onReport={handleReport} />
 			<TouchableOpacity
 				style={styles.fab}
 				onPress={() => setModalVisible(true)}

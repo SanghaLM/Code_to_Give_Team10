@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, Image, TextInput, Button, TouchableOpacity, StyleSheet, FlatList, Modal, Pressable, Platform, ToastAndroid, Alert } from 'react-native';
 
-function Post({ post, onReact, onAddComment }) {
+function Post({ post, onReact, onAddComment, onReport }) {
 	const [comment, setComment] = useState('');
 	const [menuVisible, setMenuVisible] = useState(false);
 	const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
@@ -19,15 +19,22 @@ function Post({ post, onReact, onAddComment }) {
 		}
 	};
 
-	const handleReport = () => {
+	const handleReport = async () => {
 		setMenuVisible(false);
-		setTimeout(() => {
-			if (Platform.OS === 'android') {
-				ToastAndroid.show('Report forwarded to staff for review.', ToastAndroid.SHORT);
-			} else {
-				Alert.alert('Reported', 'Report forwarded to staff for review.');
-			}
-		}, 300);
+		try {
+			const idStr = String(post.id || post._id);
+			if (onReport) await onReport(idStr);
+			setTimeout(() => {
+				if (Platform.OS === 'android') {
+					ToastAndroid.show('Report forwarded to staff for review.', ToastAndroid.SHORT);
+				} else {
+					Alert.alert('Reported', 'Report forwarded to staff for review.');
+				}
+			}, 300);
+		} catch (err) {
+			console.warn('Report failed', err);
+			Alert.alert('Error', 'Failed to send report.');
+		}
 	};
 
 	return (
@@ -70,12 +77,12 @@ function Post({ post, onReact, onAddComment }) {
 				</TouchableOpacity>
 			</View>
 			<View style={styles.commentsSection}>
-				{post.comments.map(c => (
-					<Text key={c.id} style={styles.comment}>
-						<Text style={{ fontWeight: 'bold' }}>{c.username}: </Text>
-						{c.text}
-					</Text>
-				))}
+					{(post.comments || []).map((c, ci) => (
+						<Text key={`${String(c.id || c._id || 'comment')}-${ci}`} style={styles.comment}>
+							<Text style={{ fontWeight: 'bold' }}>{c.username}: </Text>
+							{c.text}
+						</Text>
+					))}
 				<View style={styles.addCommentRow}>
 					<TextInput
 						style={styles.commentInput}
@@ -98,16 +105,17 @@ function Post({ post, onReact, onAddComment }) {
 	);
 }
 
-export default function PublicPosts({ posts, onReact, onAddComment }) {
+export default function PublicPosts({ posts, onReact, onAddComment, onReport }) {
 	return (
 		<FlatList
 			data={posts}
-			keyExtractor={item => item.id}
-			renderItem={({ item }) => (
+			keyExtractor={(item, index) => `${String(item.id || item._id || 'post')}-${index}`}
+			renderItem={({ item, index }) => (
 				<Post
 					post={item}
-					onReact={() => onReact(item.id)}
-					onAddComment={comment => onAddComment(item.id, comment)}
+					onReact={() => onReact(item.id || item._id || index)}
+					onAddComment={comment => onAddComment(item.id || item._id || index, comment)}
+					onReport={() => onReport && onReport(item.id || item._id || index)}
 				/>
 			)}
 			ListFooterComponent={<View style={{ height: 80 }} />} // Spacer for footer message and FAB

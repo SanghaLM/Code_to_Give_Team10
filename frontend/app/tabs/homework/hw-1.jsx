@@ -417,7 +417,7 @@ export default function Hw1Screen() {
       playbackSound.current.stopAsync();
     }
     setTimeout(() => {
-      router.push("/tabs/homework/hw-2");
+  router.push("/tabs/homework/hw-2");
     }, 1000);
   };
 
@@ -882,7 +882,7 @@ export default function Hw1Screen() {
           {renderEmoji()}
 
           <View style={styles.wordContainer}>
-            <Text style={styles.word}>{currentWord}</Text>
+            <Text style={styles.word}>{words[index]?.word || currentWord}</Text>
           </View>
 
           {currentStep !== "complete" && (
