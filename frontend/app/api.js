@@ -2,7 +2,7 @@
 import { Platform } from 'react-native';
 // On Android emulators, 'localhost' refers to the emulator itself. Use 10.0.2.2
 // to reach the host machine. Allow EXPO_PUBLIC_API_URL to override for LAN or prod.
-const API_BASE = 'http://192.168.9.197:3000/api';   // CHANGE EXPO API FOR CONNECTION HERE
+const API_BASE = process.env.IPv4_URL;   // CHANGE EXPO API FOR CONNECTION HERE
 console.log('API_BASE set to', API_BASE);
 
 export async function request(path, options = {}, token) {
